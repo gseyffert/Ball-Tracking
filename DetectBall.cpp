@@ -5,6 +5,7 @@
 #include "opencv2/highgui/highgui.hpp"
 
 using namespace cv;
+using namespace std;
 //initial min and max HSV filter values.
 //these will be changed using trackbars
 int H_MIN = 0;
@@ -27,35 +28,32 @@ const String windowName1 = "HSV Image";
 const String windowName2 = "Thresholded Image";
 const String windowName3 = "After Morphological Operations";
 const String trackbarWindowName = "Trackbars";
+
 void on_trackbar( int, void* )
 {//This function gets called whenever a
 	// trackbar position is changed
 
 
 
-
-
 }
+
 String intToString(int number){
-
-
-	std::stringstream ss;
+	stringstream ss;
 	ss << number;
 	return ss.str();
 }
+
 void createTrackbars(){
 	//create window for trackbars
-
-
     namedWindow(trackbarWindowName,0);
 	//create memory to store trackbar name on window
 	char TrackbarName[50];
-	sprintf( TrackbarName, "H_MIN x %d", H_MIN);
-	sprintf( TrackbarName, "H_MAX", H_MAX);
-	sprintf( TrackbarName, "S_MIN", S_MIN);
-	sprintf( TrackbarName, "S_MAX", S_MAX);
-	sprintf( TrackbarName, "V_MIN", V_MIN);
-	sprintf( TrackbarName, "V_MAX", V_MAX);
+	sprintf( TrackbarName, "H_MIN x %i", H_MIN);
+	sprintf( TrackbarName, "H_MAX x %i", H_MAX);
+	sprintf( TrackbarName, "S_MIN x %i", S_MIN);
+	sprintf( TrackbarName, "S_MAX x %i", S_MAX);
+	sprintf( TrackbarName, "V_MIN x %i", V_MIN);
+	sprintf( TrackbarName, "V_MAX x %i", V_MAX);
 	//create trackbars and insert them into window
 	//3 parameters are: the address of the variable that is changing when the trackbar is moved(eg.H_LOW),
 	//the max value the trackbar can move (eg. H_HIGH), 
@@ -69,17 +67,12 @@ void createTrackbars(){
     createTrackbar( "V_MAX", trackbarWindowName, &V_MAX, V_MAX, on_trackbar );
 
 	on_trackbar( H_MIN, 0 );
-
-
 }
+
 void drawObject(int x, int y,Mat &frame){
 
 	//use some of the openCV drawing functions to draw crosshairs
 	//on your tracked image!
-
-    //UPDATE:JUNE 18TH, 2013
-    //added 'if' and 'else' statements to prevent
-    //memory errors from writing off the screen (ie. (-25,-25) is not within the window!)
 
 	circle(frame,Point(x,y),20,Scalar(0,255,0),2);
     if(y-25>0)
@@ -98,8 +91,8 @@ void drawObject(int x, int y,Mat &frame){
 	putText(frame,intToString(x)+","+intToString(y),Point(x,y+30),1,1,Scalar(0,255,0),2);
 
 }
-void morphOps(Mat &thresh){
 
+void morphOps(Mat &thresh){
 	//create structuring element that will be used to "dilate" and "erode" image.
 	//the element chosen here is a 3px by 3px rectangle
 
@@ -110,20 +103,16 @@ void morphOps(Mat &thresh){
 	erode(thresh,thresh,erodeElement);
 	erode(thresh,thresh,erodeElement);
 
-
 	dilate(thresh,thresh,dilateElement);
 	dilate(thresh,thresh,dilateElement);
-	
-
-
 }
 void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed){
 
 	Mat temp;
 	threshold.copyTo(temp);
 	//these two vectors needed for output of findContours
-	std::vector< std::vector<Point> > contours;
-	std::vector<Vec4i> hierarchy;
+	vector< vector<Point> > contours;
+	vector<Vec4i> hierarchy;
 	//find contours of filtered image using openCV findContours function
 	findContours(temp,contours,hierarchy,RETR_CCOMP,CHAIN_APPROX_SIMPLE );
 	//use moments method to find our filtered object
@@ -152,7 +141,7 @@ void trackFilteredObject(int &x, int &y, Mat threshold, Mat &cameraFeed){
 
 			}
 			//let user know you found an object
-			if(objectFound ==true){
+			if(objectFound){
 				putText(cameraFeed,"Tracking Object",Point(0,50),2,1,Scalar(0,255,0),2);
 				//draw object location on screen
 				drawObject(x,y,cameraFeed);}
@@ -164,8 +153,8 @@ int main(int argc, char* argv[])
 {
 	//some boolean variables for different functionality within this
 	//program
-    bool trackObjects = false;
-    bool useMorphOps = false;
+    bool trackObjects = true;
+    bool useMorphOps = true;
 	//Matrix to store each frame of the webcam feed
 	Mat cameraFeed;
 	//matrix storage for HSV image
@@ -177,46 +166,44 @@ int main(int argc, char* argv[])
 	//create slider bars for HSV filtering
 	createTrackbars();
 	//video capture object to acquire webcam feed
-	VideoCapture capture;
-	if(!argv[1]){
-		//open capture object at location zero (default location for webcam)
-		capture.open(0);
-		//set height and width of capture frame
-		capture.set(CAP_PROP_FRAME_WIDTH,FRAME_WIDTH);
-		capture.set(CAP_PROP_FRAME_HEIGHT,FRAME_HEIGHT);
-	}
+
 	//start an infinite loop where webcam feed is copied to cameraFeed matrix
 	//all of our operations will be performed within this loop
 	while(1){
 		//store image to matrix		
-		if(argv[1])
-			cameraFeed = imread( argv[1], 1 );
-		else
-			capture.read(cameraFeed);
-		//convert frame from BGR to HSV colorspace
-		cvtColor(cameraFeed,HSV,COLOR_BGR2HSV);
-		//filter HSV image between values and store filtered image to
-		//threshold matrix
-		inRange(HSV,Scalar(H_MIN,S_MIN,V_MIN),Scalar(H_MAX,S_MAX,V_MAX),threshold);
-		//perform morphological operations on thresholded image to eliminate noise
-		//and emphasize the filtered object(s)
-		if(useMorphOps)
-		morphOps(threshold);
-		//pass in thresholded frame to our object tracking function
-		//this function will return the x and y coordinates of the
-		//filtered object
-		if(trackObjects)
-			trackFilteredObject(x,y,threshold,cameraFeed);
-
-		//show frames 
-		imshow(windowName2,threshold);
-		imshow(windowName,cameraFeed);
-		imshow(windowName1,HSV);
 		
-		//delay 30ms so that screen can refresh.
-		//image will not appear without this waitKey() command
-		waitKey(30);
-	}
+		for (int i =200; i <= 299 ; i++){
+			char buffer [50];
+  			int n, a=5, b=3;
+  			sprintf (buffer, "putts/%03d.jpg", i);
+  			printf ("%s\n",buffer);
 
+			cameraFeed = imread( buffer, 1 );
+
+			//convert frame from BGR to HSV colorspace
+			cvtColor(cameraFeed,HSV,COLOR_BGR2HSV);
+			//filter HSV image between values and store filtered image to
+			//threshold matrix
+			inRange(HSV,Scalar(H_MIN,S_MIN,V_MIN),Scalar(H_MAX,S_MAX,V_MAX),threshold);
+			//perform morphological operations on thresholded image to eliminate noise
+			//and emphasize the filtered object(s)
+			if(useMorphOps)
+			morphOps(threshold);
+			//pass in thresholded frame to our object tracking function
+			//this function will return the x and y coordinates of the
+			//filtered object
+			if(trackObjects)
+				trackFilteredObject(x,y,threshold,cameraFeed);
+
+			//show frames 
+			imshow(windowName2,threshold);
+			imshow(windowName,cameraFeed);
+			imshow(windowName1,HSV);
+			
+			//delay 30ms so that screen can refresh.
+			//image will not appear without this waitKey() command
+			waitKey(30);
+		}
+	}
 	return 0;
 }
