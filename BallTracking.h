@@ -1,3 +1,8 @@
+#ifndef BALL_H
+#define BALL_H
+
+#include<string>
+
 typedef struct {
 	int frameNumber;	
 	int candidateNum;
@@ -5,9 +10,9 @@ typedef struct {
 } node;
 
 typedef struct {
+	int weight;
 	node* to;
 	node* from;
-	int weight(euclidian dist?);
 } edge;
 
 typedef struct  {
@@ -22,27 +27,17 @@ typedef struct {
 	uint64_t numCandidates;
 } frame;
 
-listOfFrames;
-listofCandidates;
+// frame* listOfFrames;
+// candidate* listofCandidates;
 
-graph composeGraph(*listOfFrames) {
-	Graham
-}
+graph composeGraph(frame*);
 
-frame ballDetect(.jpg, [threshholds]) {
-	Max + Myles
-}
+frame ballDetect(string jpg, /*[threshholds]*/);
 
-listOfCandidates shortestPath(graph) {
-	Evan
-}
+listOfCandidates shortestPath(graph);
 
-mp4 visualize(listOfCandidates, srcVid.mp4) {
-	Avi
-}
+mp4 visualize(candidate*, string srcVidMp4);
 
-main(int argc, int **argv[]) {
-	David
-}
+int main(int argc, int **argv[]);
 
-
+#endif
