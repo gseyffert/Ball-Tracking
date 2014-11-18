@@ -3,18 +3,21 @@
 
 #include<string>
 
+// NODE STRUCT
 typedef struct {
-	int frameNumber;	
-	int candidateNum;
+	int frameNum;	
+	candidate* cand;
 	edge* list;
 } node;
 
+// EDGE STRUCT
 typedef struct {
 	int weight;
 	node* to;
 	node* from;
 } edge;
 
+// CANDIDATE STRUCT
 typedef struct  {
 	int x;
 	int y;
@@ -22,6 +25,7 @@ typedef struct  {
 	int probability;
 } candidate;
 
+// FRAME Struct
 typedef struct {
 	candidate* list;
 	uint64_t numCandidates;
@@ -30,14 +34,24 @@ typedef struct {
 // frame* listOfFrames;
 // candidate* listofCandidates;
 
-graph composeGraph(frame*);
+// Input: Array of all the frames (each has array of candidates for that frame)
+// Output: the source node of the graph (ie the start point)
+node* composeGraph(frame*);
 
-frame ballDetect(string jpg, /*[threshholds]*/);
+// Input: The filename for the jpeg and thresholds (to be decided)
+// Output: An array of frames where each frame contains the candidate positions for that frame
+frame* ballDetect(string jpg, /*[threshholds]*/);
 
-listOfCandidates shortestPath(graph);
+// Input: the graph of frame candidates for every frame
+// Output: a path where the returned pointer is the first node in the path and each node has only one edge out
+// 		   there will be one node per frame representing which candidate we selected as the ball (cand pointer)
+node* shortestPath(node* graph);
 
-mp4 visualize(candidate*, string srcVidMp4);
+// Input: the trajectory path in the form of a nodes array, also the source and output string names for the mp4 videos
+// Output: output mp4 video with the candidates drawn in a bounding box
+void visualize(node* trajectory, string srcVidMp4, string outputVidName);
 
+// Does all the plumbing
 int main(int argc, int **argv[]);
 
 #endif
