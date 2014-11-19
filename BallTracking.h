@@ -13,8 +13,8 @@ typedef struct {
 // EDGE STRUCT
 typedef struct {
 	int weight;
-	node* to;
-	node* from;
+	node* start;
+	node* end;
 } edge;
 
 // CANDIDATE STRUCT
