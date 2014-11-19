@@ -3,27 +3,40 @@
 
 #include<string>
 
-// NODE STRUCT
-typedef struct {
-	int frameNum;	
-	candidate* cand;
-	edge* list;
-} node;
-
-// EDGE STRUCT
-typedef struct {
-	int weight;
-	node* start;
-	node* end;
-} edge;
+using namespace std;
 
 // CANDIDATE STRUCT
-typedef struct  {
+typedef struct {
 	int x;
 	int y;
 	int radius;
 	int probability;
 } candidate;
+
+struct edge;
+
+// NODE STRUCT
+struct node{
+	int frameNum;
+	int candidateNum;
+	bool isStart = false; //Set this for node S
+	bool isSink = false;	 //Set this for node T
+	int numEdges;
+	candidate* cand;
+	edge* edgeList;
+
+	bool operator==(const node &other) const
+	  { return (frameNum == other.frameNum
+	            && candidateNum == other.candidateNum);
+	  }
+};
+
+// EDGE STRUCT
+struct edge{
+	int weight;
+	node* start;
+	node* end;
+};
 
 // FRAME Struct
 typedef struct {
@@ -40,7 +53,7 @@ node* composeGraph(frame*);
 
 // Input: The filename for the jpeg and thresholds (to be decided)
 // Output: An array of frames where each frame contains the candidate positions for that frame
-frame* ballDetect(string jpg, /*[threshholds]*/);
+frame* ballDetect(string jpg /*, [threshholds]*/);
 
 // Input: the graph of frame candidates for every frame
 // Output: a path where the returned pointer is the first node in the path and each node has only one edge out
@@ -52,6 +65,6 @@ node* shortestPath(node* graph);
 void visualize(node* trajectory, string srcVidMp4, string outputVidName);
 
 // Does all the plumbing
-int main(int argc, int **argv[]);
+int main(int argc, char* argv[]);
 
 #endif
