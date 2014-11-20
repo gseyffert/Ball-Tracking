@@ -2,6 +2,7 @@
 #define BALL_H
 
 #include<string>
+#include "utils/LinkedList.cpp"
 
 using namespace std;
 
@@ -58,7 +59,7 @@ frame* ballDetect(string jpg /*, [threshholds]*/);
 // Input: the graph of frame candidates for every frame
 // Output: a path where the returned pointer is the first node in the path and each node has only one edge out
 // 		   there will be one node per frame representing which candidate we selected as the ball (cand pointer)
-node* shortestPath(node* graph);
+LinkedList<node*> shortestPath(node* graph);
 
 // Input: the trajectory path in the form of a nodes array, also the source and output string names for the mp4 videos
 // Output: output mp4 video with the candidates drawn in a bounding box
