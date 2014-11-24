@@ -21,8 +21,9 @@ node* composeGraph(frame* frameArray, int numFrames){
 
     //Initialize loop variables
     frame* curFrame, prevFrame = &frameArray[0];
-    int numCandidates, numPrevCandidates = 1;
-    candidate* curCand, prevCand, candidateArray;
+    int numCandidates = curFrame->numCandidates; 
+    int numPrevCandidates = 1;
+    candidate* curCand, candidateArray;
     node* prevNodes;
 
     // Go through each frame
@@ -35,27 +36,31 @@ node* composeGraph(frame* frameArray, int numFrames){
         }
         
         candidate* candidateArray = curFrame->candidateList;
+        curFrame->nodes = new node[numCandidates];
         
         // Go through each candidate of current frame and create a node for it
         for(int j = 0; j < numCandidates; j++) {
             curCand = &candidateArray[j];
             
-            // Allocate graph node for this candidate and add node to current frame's list of nodes
-            node* thisCand = new node(i, j, curCand);
-            curFrame->nodes[j] = thisCand;
+            //Allocate graph node for this candidate and add node to current frame's list of nodes
+            node* curNode = new node(i, j, curCand);
+            curFrame->nodes[j] = curNode;
             
-            //Link source to first frame
+            //Initialize edgeList for current node
+            curNode->edgeList = new edge[prevFrame->numCandidates];
+            
+            //Link to source if first frame
             if (i = 0) {
-                edge temp = new edge(source, thisCand, 0.0); //update w/ appropriate heuristic function
+                edge* temp = new edge(source, curNode, 0.0); //update 0.0 w/ appropriate heuristic function
                 source->edgeList[j] = temp;
             }
-            //Set edges from the prev frame's nodes to this candidate's node if not first frame
+            //Set edges from the prev frame's nodes to start at itself end at this candidate's node if not first frame
             else {
                 prevNodes = prevFrame->nodes;
                 for (int k = 0; k < numPrevCandidates; k++) {
-                    node curNode = prevNodes[k];
-                    edge temp = new edge(curNode, thisCand, 0.0);
-                    curNode->edgeList[j] = temp;
+                    node* oldNode = prevNodes[k];
+                    edge* tempEdge = new edge(oldNode, curNode, 0.0);
+                    curNode->edgeList[j] = tempEdge;
                 }
             }
         }
