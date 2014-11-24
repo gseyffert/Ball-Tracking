@@ -93,8 +93,9 @@ struct candidate{
 
 // FRAME Struct
 struct frame{
-	candidate* candidateList;
 	int numCandidates;
+	candidate* candidateList;
+	node* nodes;
 };
 
 // frame* listOfFrames;
