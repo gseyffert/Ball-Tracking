@@ -82,6 +82,6 @@ int main(int argc, char* argv[]){
     f->candidateList = candidates;
     f->numCandidates = 4;
 
-    composeGraph(f1, 1);
+    composeGraph(f, 1);
     return 0;
 }
