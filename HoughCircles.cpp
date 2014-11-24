@@ -2,12 +2,15 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include <iostream>
+#include <cstdio>
+#include <ctime>
+#include <omp.h>
 
 using namespace std;
 using namespace cv;
 
 //max number of objects to be detected in frame
-const size_t MAX_NUM_OBJECTS=3;
+const int MAX_NUM_OBJECTS=3;
 //default capture width and height
 const int FRAME_WIDTH = 640;
 const int FRAME_HEIGHT = 480;
@@ -21,10 +24,15 @@ const std::string cannyThresholdTrackbarName = "Canny threshold";
 const std::string accumulatorThresholdTrackbarName = "Accumulator Threshold";
 
 
-const int cannyThresholdInitialValue = 180;
-const int accumulatorThresholdInitialValue = 150; //30
+const int cannyThresholdInitialValue = 13; // 180
+const int accumulatorThresholdInitialValue = 13; //30
 const int maxAccumulatorThreshold = 200;
 const int maxCannyThreshold = 255;
+
+// booleans for speed
+const bool showImage = false;
+const bool showTrackbars = false;
+const bool loopVideo = false;
 
 void on_trackbar( int, void* )
 {//This function gets called whenever a
@@ -46,19 +54,28 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
     HoughCircles( src_gray, circles, HOUGH_GRADIENT, 1, src_gray.rows/8, cannyThreshold, accumulatorThreshold, MIN_OBJECT_RADIUS, MAX_OBJECT_RADIUS );
 
     // clone the colour, input image for displaying purposes
-    int size = std::min((int)circles.size(), 2);
+    int size = std::min((int)circles.size(), MAX_NUM_OBJECTS);
+
+    //no feature/circle found
+    if (size == 0){
+        printf("----------- NONE @ %d ------ ", imageNumber);
+    }
 
     for(int i = 0; i < size; i++ )
     {
         int x = cvRound(circles[i][0]);
         int y = cvRound(circles[i][1]);
         int radius = cvRound(circles[i][2]);
+        
         printf("Image: %d X: %d Y: %d Radius: %d \n", imageNumber, x, y, radius);
-        Point center(x, y);
-        // circle center
-        circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
-        // circle outline
-        circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+        if(showImage){
+            Point center(x, y);
+            // circle center
+            circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
+            // circle outline
+            circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+        }
+
     }
 }
 
@@ -71,7 +88,7 @@ int main(int argc, char* argv[])
     if (argc < 2)
     {
         std::cerr<<"No input image specified\n";
-        return -1;
+        return 0;
     }
 
     //declare and initialize both parameters that are subjects to change
@@ -80,16 +97,24 @@ int main(int argc, char* argv[])
 
     // create the main window, and attach the trackbars
     namedWindow( windowName, WINDOW_AUTOSIZE );
-    createTrackbar(cannyThresholdTrackbarName, windowName, &cannyThreshold,maxCannyThreshold);
-    createTrackbar(accumulatorThresholdTrackbarName, windowName, &accumulatorThreshold, maxAccumulatorThreshold);
-
+    if(showTrackbars){
+        createTrackbar(cannyThresholdTrackbarName, windowName, &cannyThreshold,maxCannyThreshold);
+        createTrackbar(accumulatorThresholdTrackbarName, windowName, &accumulatorThreshold, maxAccumulatorThreshold);
+    }
+    
+    // initialize clock
+    std::clock_t start;
+    double duration;
+    start = std::clock();
+    int num;
 
     //all of our operations will be performed within this loop
     while(1){        
-
+        #pragma omp parallel for num_threads(16)
         for (int i =200; i <= 299 ; i++){
         
             //get next image name
+            num = omp_get_num_threads();
             char buffer [50];
             int n, a=5, b=3;
             sprintf (buffer, "putts/%03d.jpg", i);
@@ -102,7 +127,7 @@ int main(int argc, char* argv[])
             if( src.empty() )
             {
                 std::cerr<<"Invalid input image\n";
-                return -1;
+                // break;
             }
 
             // Convert it to gray
@@ -119,12 +144,23 @@ int main(int argc, char* argv[])
             //runs the detection, and update the display
             HoughDetection(src_gray, src, cannyThreshold, accumulatorThreshold, i);
 
-            imshow(windowName,src);
-            // imshow(windowName + "2",src_gray);
+            if(showImage){
+                imshow(windowName,src);
+                imshow(windowName + "2",src_gray);
             
-            //image will not appear without this waitKey() command
-            waitKey(1);
+               //image will not appear without this waitKey() command
+                waitKey(1);
+            }
+        }
+
+        if(!loopVideo){
+            break;
         }
     }
+
+    //Compute time
+    duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+    std::cout<<"printf: "<< duration <<'\n';
+
     return 0;
 }
