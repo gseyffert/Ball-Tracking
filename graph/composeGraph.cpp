@@ -10,70 +10,55 @@ using namespace std;
  * Builds a graph out of the candidates of each frame in the frame array
  * @param  frameArray pointer to first element in the array
  * @param  numFrames  number of frames (for bounds checking)
- * @return            a pointer to the first node in the graph
+ * @return a pointer to the first node in the graph
  */
 node* composeGraph(frame* frameArray, int numFrames){
-    // The source node of the graph (doesnt represent a frame), links to all candidates in the first frame
+    // The source node of the graph (doesn't represent a frame), links to all candidates in the first frame
     node* source = new node();
     source->isStart = true;
     source->numEdges = frameArray[0]->numCandidates;
     source->edgeList = new edge[source->numEdges]
 
-    // At the beginning the last frame is the source
-    node* lastFrame = source;
-
-    // RIGHT NOW THIS ONLY WORKS FOR THE FIRST FRAME SINCE THERE IS ONLY ONE NODE (the source) BEFORE FRAME 0
-    // FOR OTHER FRAMES WE NEED TO MAKE AN EDGE BETWEEN EVERY NODE IN THE PREVIOUS FRAME AND THE CURRENT FRAME
-
-
-    //Initialize variables
+    //Initialize loop variables
     frame* curFrame, prevFrame = &frameArray[0];
     int numCandidates, numPrevCandidates = 1;
     candidate* curCand, prevCand, candidateArray;
+    node* prevNodes;
 
     // Go through each frame
     for(int i = 0; i < numFrames; i++) {
         if (i != 0) {
             curFrame = &frameArray[i];
             numCandidates = curFrame->numCandidates;
-            prevFrame = frameArray[i-1];
+            prevFrame = &frameArray[i-1];
             numPrevCandidates = prevFrame->numCandidates;
         }
+        
         candidate* candidateArray = curFrame->candidateList;
-        cout << "Frame " << i << " has " << numCandidates << " ball candidates." << endl;
-
+        
         // Go through each candidate of current frame and create a node for it
-        // Also set edges from the last frame candidates to this candidate
-        prevCands = prevFrame->
         for(int j = 0; j < numCandidates; j++) {
-            //cout << "    Candidate " << j << " coords:(" << curCand->x << "," << curCand->y << ") confidence:" << curCand->probability << endl;
-            //cout << "    created edge (node) " << *(edgesToThisFrame[j].start) << " to (node) " << *(edgesToThisFrame[j].end) << endl << endl;
-            
             curCand = &candidateArray[j];
-            edge* edgesToThisCand = new edge[prevCandidates];
             
+            // Allocate graph node for this candidate and add node to current frame's list of nodes
+            node* thisCand = new node(i, j, curCand);
+            curFrame->nodes[j] = thisCand;
             
             //Link source to first frame
             if (i = 0) {
-                edge temp = new edge(source, );
+                edge temp = new edge(source, thisCand, 0.0); //update w/ appropriate heuristic function
                 source->edgeList[j] = temp;
-                
-            } else {
-                
-
-                
-            
-                edge* edgeToThisCand = &edgesToThisFrame[j];
-                edgeToThisCand->start = lastFrame;
-                edgeToThisCand->end = thisCand;
-                edgeToThisCand->weight = curCand->probability;
-                
             }
-           
+            //Set edges from the prev frame's nodes to this candidate's node if not first frame
+            else {
+                prevNodes = prevFrame->nodes;
+                for (int k = 0; k < numPrevCandidates; k++) {
+                    node curNode = prevNodes[k];
+                    edge temp = new edge(curNode, thisCand, 0.0);
+                    curNode->edgeList[j] = temp;
+                }
+            }
         }
-
-        // Set the edge list of the previous frame's nodes
-        lastFrame->edgeList = edgesToThisFrame;
     }
     return source;
 }
@@ -86,7 +71,7 @@ int main(int argc, char* argv[]){
     frame* f = new frame;
 
     candidate* candidates = new candidate[4];
-    for(int i=0; i < 4; i++){
+    for(int i = 0; i < 4; i++){
         candidate* c = &candidates[i];
         c->x = i;
         c->y = i;
@@ -97,6 +82,6 @@ int main(int argc, char* argv[]){
     f->candidateList = candidates;
     f->numCandidates = 4;
 
-    composeGraph(f, 1);
+    composeGraph(f1, 1);
     return 0;
 }
