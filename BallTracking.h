@@ -95,7 +95,7 @@ struct candidate{
 struct frame{
 	int numCandidates;
 	candidate* candidateList;
-	node* nodes;
+	node* nodes; //Created & populated when the graph is composed
 };
 
 // frame* listOfFrames;
