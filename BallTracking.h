@@ -70,7 +70,7 @@ struct edge{
 };
 
 // CANDIDATE STRUCT
-struct candidate{
+typedef struct candidate{
 	int x;
 	int y;
 	int radius;
@@ -88,8 +88,8 @@ struct candidate{
 		this->y = y;
 		this->radius = radius;
 		this->probability = prob;
-	}
-};
+	} 
+} candidate;
 
 // FRAME Struct
 struct frame{
@@ -120,5 +120,4 @@ void visualize(node* trajectory, string srcVidMp4, string outputVidName);
 
 // Does all the plumbing
 int main(int argc, char* argv[]);
-
 #endif

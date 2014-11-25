@@ -9,5 +9,5 @@ if (OPENMP_FOUND)
 endif()
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-add_executable( HoughCircles HoughCircles.cpp )
-target_link_libraries( HoughCircles ${OpenCV_LIBS} )
+add_executable( DetectBallCV DetectBallCV.cpp )
+target_link_libraries( DetectBallCV ${OpenCV_LIBS} )
