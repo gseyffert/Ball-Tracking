@@ -14,7 +14,9 @@ using namespace std;
  */
 node* composeGraph(frame* frameArray, int numFrames){
     // The source node of the graph (doesn't represent a frame), links to all candidates in the first frame
-    node* source = new node();
+    node* source, sink = new node();
+    sink->isSink = true;
+    sink->edgeList = new edge[frameArray[numFrames-1]->numCandidates]
     source->isStart = true;
     source->numEdges = frameArray[0]->numCandidates;
     source->edgeList = new edge[source->numEdges]
@@ -43,14 +45,16 @@ node* composeGraph(frame* frameArray, int numFrames){
             curCand = &candidateArray[j];
             
             //Allocate graph node for this candidate and add node to current frame's list of nodes
-            node* curNode = new node(i, j, curCand);
-            curFrame->nodes[j] = curNode;
+            curFrame->nodes[j].frameNum = i;
+            curFrame->nodes[j].candNum = j;
+            curFrame->nodes[j].cand = curCand;
+            curNode = &(curFrame->nodes[j]);
             
             //Initialize edgeList for current node
             curNode->edgeList = new edge[prevFrame->numCandidates];
-            
+
             //Link to source if first frame
-            if (i = 0) {
+            if (i == 0) {
                 edge* temp = new edge(source, curNode, 0.0); //update 0.0 w/ appropriate heuristic function
                 source->edgeList[j] = temp;
             }
@@ -58,9 +62,14 @@ node* composeGraph(frame* frameArray, int numFrames){
             else {
                 prevNodes = prevFrame->nodes;
                 for (int k = 0; k < numPrevCandidates; k++) {
-                    node* oldNode = prevNodes[k];
-                    edge* tempEdge = new edge(oldNode, curNode, 0.0);
-                    curNode->edgeList[j] = tempEdge;
+                    node oldNode = prevNodes[k];
+                    curNode->edgeList[k].start = oldNode;
+                    curNode->edgeList[k].end = curNode;
+                    curNode->edgeList[k].weight = 0.0; //update w/ appropriate heuristic function
+                    if (i == numFrames - 1) {
+                        sink->edgeList[k].start = curNode;
+                        sink->edgeList[k].end = sink;
+                    }
                 }
             }
         }
@@ -73,7 +82,7 @@ node* composeGraph(frame* frameArray, int numFrames){
  * @return 0
  */
 int main(int argc, char* argv[]){
-    frame* f = new frame;
+    frame* f = new frame[1000];
 
     candidate* candidates = new candidate[4];
     for(int i = 0; i < 4; i++){
@@ -84,9 +93,21 @@ int main(int argc, char* argv[]){
         c->radius = i;
     }
 
-    f->candidateList = candidates;
-    f->numCandidates = 4;
+    for (int i = 0; i < 1000; i++) {
+        f[i]->candidateList = candidates;
+        f[i]->numCandidates = 4;
+    }
+    
+    t1 = timestamp();
+    node* curNode = composeGraph(f, 1);
+    t1 = timestamp() - t1;
 
-    composeGraph(f, 1);
+    for (int i = 0; i < 1000; i++) {
+        edge* tmp = curNode->edgeList;
+        for (int j = 0; j < curNode->numEdges; j++) {
+            tmp 
+        }
+    }
+    
     return 0;
 }
