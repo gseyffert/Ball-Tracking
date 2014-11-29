@@ -3,6 +3,7 @@
  */
 
 #include "../BallTracking.h"
+#include <cmath> //sqrt, pow
 
 using namespace std;
 
@@ -48,24 +49,24 @@ node* composeGraph(frame* frameArray, int numFrames){
             curFrame->nodes[j].frameNum = i;
             curFrame->nodes[j].candNum = j;
             curFrame->nodes[j].cand = curCand;
-            curNode = &(curFrame->nodes[j]);
+            node* curNode = &(curFrame->nodes[j]);
             
             //Initialize edgeList for current node
             curNode->edgeList = new edge[prevFrame->numCandidates];
 
             //Link to source if first frame
             if (i == 0) {
-                edge* temp = new edge(source, curNode, 0.0); //update 0.0 w/ appropriate heuristic function
+                edge* temp = new edge(source, curNode, curNode->candidate->probability); //for the edges from the source node we just weight with the confidence level of the candidate
                 source->edgeList[j] = temp;
             }
             //Set edges from the prev frame's nodes to start at itself end at this candidate's node if not first frame
             else {
                 prevNodes = prevFrame->nodes;
                 for (int k = 0; k < numPrevCandidates; k++) {
-                    node oldNode = prevNodes[k];
+                    node* oldNode = &prevNodes[k];
                     curNode->edgeList[k].start = oldNode;
                     curNode->edgeList[k].end = curNode;
-                    curNode->edgeList[k].weight = 0.0; //update w/ appropriate heuristic function
+                    curNode->edgeList[k].weight = euclidianDistHeuristic(oldNode, curNode); //update w/ appropriate heuristic function
                     if (i == numFrames - 1) {
                         sink->edgeList[k].start = curNode;
                         sink->edgeList[k].end = sink;
@@ -75,6 +76,28 @@ node* composeGraph(frame* frameArray, int numFrames){
         }
     }
     return source;
+}
+
+/**
+ * Edge weight heuristic which computes the euclidian distance between the end and start node
+ * Therefore transitions between candidates that are close together will be prerferred by the shortest path algorithm
+ * Also multiply by the reciprocal of the smallest confidence level 
+ * (ie a high confidence level will decrease this value, a low confidence level will increase it)
+ * @param  startNode pointer to the source node of the edge
+ * @param  endNode   pointer to the destination node of the edge
+ * @return           a decimal edge weight
+ */
+double euclidianDistHeuristic(node* startNode, node* endNode){
+    double val;
+    candidate* startCand = startNode->candidate;
+    candidate* endCand = endNode->candidate;
+    val = pow((endCand->x - startCand->x),2);
+    val = val + pow((endCand->y - startCand->y),2);
+    val = sqrt(val);
+    double confidenceLevel = min(startCand->probability, endCand->probability);
+    confidenceLevel = 1/confidenceLevel;
+    val = val * confidenceLevel;
+    return val;
 }
 
 /**
