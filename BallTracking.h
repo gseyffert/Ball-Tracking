@@ -70,7 +70,7 @@ struct edge{
 };
 
 // CANDIDATE STRUCT
-struct candidate{
+typedef struct candidate{
 	int x;
 	int y;
 	int radius;
@@ -89,14 +89,14 @@ struct candidate{
 		this->radius = radius;
 		this->probability = prob;
 	}
-};
+} candidate;
 
 // FRAME Struct
-struct frame{
+typedef struct frame {
 	int numCandidates;
 	candidate* candidateList;
 	node* nodes; //Created & populated when the graph is composed
-};
+} frame;
 
 // frame* listOfFrames;
 // candidate* listofCandidates;
