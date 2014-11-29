@@ -87,11 +87,11 @@ typedef struct candidate{
 } candidate;
 
 // FRAME Struct
-struct frame{
+typedef struct frame {
 	int numCandidates;
 	candidate* candidateList;
 	node* nodes; //Created & populated when the graph is composed
-};
+} frame;
 
 // frame* listOfFrames;
 // candidate* listofCandidates;
