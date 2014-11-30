@@ -122,7 +122,7 @@ LinkedList<node*> shortestPath(node* graph, int numVerts){
     return output;
 }
 
-int main(int argc, char* argv[]){
+int main(){
     cout << "Creating graph" << endl;
     // Create Source node
     node* s = new node;
@@ -206,7 +206,7 @@ int main(int argc, char* argv[]){
     LLNode<node*>* cur = o.getNode(0);
     while(cur != NULL){
         node* c = cur->item;
-        cout << c->frameNum << "," << c->candidateNum << endl;
+        cout << *c << endl;
         cur = cur->next;
     }
 
