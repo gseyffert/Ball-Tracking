@@ -18,8 +18,8 @@ struct frame;
 typedef struct node{
 	int frameNum;
 	int candidateNum;
-	bool isStart = false; //Set this for node S
-	bool isSink = false;	 //Set this for node T
+	bool isStart; //Set this for node S
+	bool isSink;	 //Set this for node T
 	int numEdges;
 	candidate* cand;
 	edge* edgeList;
@@ -30,6 +30,8 @@ typedef struct node{
 		this->numEdges = 0;
 		this->cand = NULL;
 		this->edgeList = NULL;
+		this->isStart = false;
+		this->isSink = false;
 	}  
 
 	node(int fnum, int cnum, candidate* c){
@@ -38,6 +40,8 @@ typedef struct node{
 		this->cand = c;
 		this->numEdges = 0;
 		this->edgeList = NULL;
+		this->isSink = false;
+		this->isStart = false;
 	}
 
 	// You can print a node by doing cout << [node_var] and it will print (frameNum,candidateNum)
