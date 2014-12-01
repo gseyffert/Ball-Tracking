@@ -86,9 +86,9 @@ int main(){
     cout << "Running DFS" << endl;
     // LinkedList lin;
     // DFS(s, lin);
-    LinkedList<node*> o = shortestPath(s, 6);
+    LinkedList<node*>* o = shortestPath(s, 6);
     cout << "\nfinal path:" << endl;
-    LLNode<node*>* cur = o.getNode(0);
+    LLNode<node*>* cur = o->getNode(0);
     while(cur != NULL){
         node* c = cur->item;
         cout << *c << endl;

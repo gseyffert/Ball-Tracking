@@ -59,7 +59,7 @@ void DFS(node* graph, LinkedList<node*> &linearizedOrder){
 //////////////////////////////////////////
 // The shortest path algorithm for DAGs //
 //////////////////////////////////////////
-LinkedList<node*> shortestPath(node* graph, int numVerts){
+LinkedList<node*>* shortestPath(node* graph, int numVerts){
     // Nodes are hashed by their frame num and candidate num
     unordered_map<pair<int,int>,double, pairhash> dist;
     unordered_map<pair<int,int>,node*, pairhash> prev; //prev[n] = the node that comes before node n in the shortest path from s to t
@@ -110,14 +110,15 @@ LinkedList<node*> shortestPath(node* graph, int numVerts){
         cur = cur->next;
     }
 
-    LinkedList<node*> output;
+    LinkedList<node*>* output = new LinkedList<node*>;
     // Now output the shortest path
     cur = linearizedOrder.getNode(linearizedOrder.length()-1); //Get sink
     node* curNode = cur->item;
     while(curNode != NULL){
         pair<int,int> key (curNode->frameNum, curNode->candidateNum);
-        output.insertFront(curNode);
+        output->insertFront(curNode);
         curNode = prev[key];
     }    
+    cout << "Done with shortest path" << endl;
     return output;
 }
