@@ -49,5 +49,14 @@ int main(int argc, char* argv[]){
 
     // run BFS on the graph to make sure that everything is correct
     
+    // Free the graph after we are done
+    freeGraph(f, curNode, NUM_FRAMES);
+
+    //Now free all the frames and candidates
+    for(int i=0; i<NUM_FRAMES; i++){
+        frame* curFrame = f + i;
+        delete curFrame->candidateList;
+    }
+    delete f;
     return 0;
 }
