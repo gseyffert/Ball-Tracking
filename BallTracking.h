@@ -116,7 +116,7 @@ void visualize(node* trajectory, string srcVidMp4, string outputVidName);
 // Frees all the memory allocated when we compose the graph
 // Input: the array of frames and number of frames
 // Output: Nothing, all the fames->nodes pointers are deallocated and set to null
-void freeGraph(frame* listOfFrames, graph* node, int numFrames);
+//void freeGraph(frame* listOfFrames, graph* node, int numFrames);
 
 // Does all the plumbing
 int main(int argc, char* argv[]);

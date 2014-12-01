@@ -4,11 +4,13 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
-#include <omp.h>
+//#include <omp.h>
 #include "BallTracking.h"
 
 using namespace std;
 using namespace cv;
+
+#include "DetectBallCV.hpp"
 
 //max number of objects to be detected in frame
 const int MAX_NUM_OBJECTS=3;
@@ -54,7 +56,7 @@ void printCandidates(candidate* candidateArray){
         printf("(x, y, radius, probability)\n");
     for(int i = 0; i < MAX_NUM_OBJECTS; i++){
         candidate temp = candidateArray[i];
-        printf("(%d, %d, %d, %d)\n", temp.x, temp.y, temp.radius, temp.probability);
+        printf("(%d, %d, %d, %f)\n", temp.x, temp.y, temp.radius, temp.probability);
     }
 }
 //////////////////////////
@@ -71,7 +73,7 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
 
     //no feature/circle found
     if (size == 0){
-        printf("---- NO CANDIDATES ------ ");
+        //printf("---- NO CANDIDATES ------ ");
     }
 
     // loop though circles and add them to candidate
@@ -81,7 +83,7 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
         int y = cvRound(circles[i][1]);
         int radius = cvRound(circles[i][2]);
         
-        printf("X: %d Y: %d Radius: %d \n", x, y, radius);
+        //printf("X: %d Y: %d Radius: %d \n", x, y, radius);
 
         candidateArray[i] = candidate(x, y, radius, 1); //x, y, radius, probability
 
@@ -95,7 +97,7 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
     }
 }
 
-void detectBall(Mat& src, candidate* candidateArray) {
+void detectBall(Mat src, candidate* candidateArray) {
     /**
      * Takes in a Mat (image matrix) src and a pointer to an Array of Candidates
      * Returns void, but fills candidate Array with possible candidates
@@ -125,8 +127,7 @@ void detectBall(Mat& src, candidate* candidateArray) {
         waitKey(1);
     }
 }
-
-
+/*
 int main(int argc, char* argv[])
 {
     //Matrix to store each frame of the webcam feed
@@ -180,5 +181,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
-
+*/
