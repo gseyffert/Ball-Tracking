@@ -13,7 +13,7 @@ struct node;
 struct frame;
 
 // NODE STRUCT
-struct node{
+typedef struct node{
 	int frameNum;
 	int candidateNum;
 	bool isStart = false; //Set this for node S
@@ -43,10 +43,10 @@ struct node{
 		o << "(" << n.frameNum << "," << n.candidateNum << ")";
 		return o;
 	}
-};
+} node;
 
 // EDGE STRUCT
-struct edge{
+typedef struct edge{
 	double weight;
 	node* start;
 	node* end;
@@ -62,7 +62,7 @@ struct edge{
 		start = s;
 		end = e;
 	}
-};
+} edge;
 
 // CANDIDATE STRUCT
 typedef struct candidate{
