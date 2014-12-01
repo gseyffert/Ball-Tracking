@@ -118,6 +118,16 @@ void visualize(node* trajectory, string srcVidMp4, string outputVidName);
 // Output: Nothing, all the fames->nodes pointers are deallocated and set to null
 void freeGraph(frame* listOfFrames, node* graph, int numFrames);
 
-// Does all the plumbing
-int main(int argc, char* argv[]);
+/**
+ * Edge weight heuristic which computes the euclidian distance between the end and start node
+ * Therefore transitions between candidates that are close together will be prerferred by the shortest path algorithm
+ * Also multiply by the reciprocal of the smallest confidence level 
+ * (ie a high confidence level will decrease this value, a low confidence level will increase it)
+ * @param  startNode pointer to the source node of the edge
+ * @param  endNode   pointer to the destination node of the edge
+ * @return           a decimal edge weight
+ */
+double euclidianDistHeuristic(node* startNode, node* endNode);
+
+// main.cpp Does all the plumbing
 #endif

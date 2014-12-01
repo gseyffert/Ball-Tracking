@@ -15,15 +15,19 @@ using namespace std;
  */
 node* composeGraph(frame* frameArray, int numFrames){
     // The source node of the graph (doesn't represent a frame), links to all candidates in the first frame
-    node* source, sink = new node();
+    node* source, *sink;
+    source = new node();
+    sink = new node();
     sink->isSink = true;
-    sink->edgeList = new edge[frameArray[numFrames-1]->numCandidates]
+    sink->edgeList = new edge[frameArray[numFrames-1].numCandidates];
     source->isStart = true;
-    source->numEdges = frameArray[0]->numCandidates;
-    source->edgeList = new edge[source->numEdges]
+    source->numEdges = frameArray[0].numCandidates;
+    source->edgeList = new edge[source->numEdges];
 
     //Initialize loop variables
-    frame* curFrame, prevFrame = &frameArray[0];
+    frame* curFrame, *prevFrame;
+    curFrame = &frameArray[0];
+    prevFrame = &frameArray[0];
     int numCandidates = curFrame->numCandidates; 
     int numPrevCandidates = 1;
     candidate* curCand, candidateArray;
@@ -47,7 +51,7 @@ node* composeGraph(frame* frameArray, int numFrames){
             
             //Allocate graph node for this candidate and add node to current frame's list of nodes
             curFrame->nodes[j].frameNum = i;
-            curFrame->nodes[j].candNum = j;
+            curFrame->nodes[j].candidateNum = j;
             curFrame->nodes[j].cand = curCand;
             node* curNode = &(curFrame->nodes[j]);
             
@@ -56,8 +60,9 @@ node* composeGraph(frame* frameArray, int numFrames){
 
             //Link to source if first frame
             if (i == 0) {
-                edge* temp = new edge(source, curNode, curNode->candidate->probability); //for the edges from the source node we just weight with the confidence level of the candidate
-                source->edgeList[j] = temp;
+                source->edgeList[j].weight = euclidianDistHeuristic(source, curNode);
+                source->edgeList[j].start = source;
+                source->edgeList[j].end = curNode;
             }
             //Set edges from the prev frame's nodes to start at itself end at this candidate's node if not first frame
             else {
@@ -89,8 +94,8 @@ node* composeGraph(frame* frameArray, int numFrames){
  */
 double euclidianDistHeuristic(node* startNode, node* endNode){
     double val;
-    candidate* startCand = startNode->candidate;
-    candidate* endCand = endNode->candidate;
+    candidate* startCand = startNode->cand;
+    candidate* endCand = endNode->cand;
     val = pow((endCand->x - startCand->x),2);
     val = val + pow((endCand->y - startCand->y),2);
     val = sqrt(val);
@@ -98,39 +103,4 @@ double euclidianDistHeuristic(node* startNode, node* endNode){
     confidenceLevel = 1/confidenceLevel;
     val = val * confidenceLevel;
     return val;
-}
-
-/**
- * Test Code
- * @return 0
- */
-int main(int argc, char* argv[]){
-    frame* f = new frame[1000];
-
-    candidate* candidates = new candidate[4];
-    for(int i = 0; i < 4; i++){
-        candidate* c = &candidates[i];
-        c->x = i;
-        c->y = i;
-        c->probability = i;
-        c->radius = i;
-    }
-
-    for (int i = 0; i < 1000; i++) {
-        f[i]->candidateList = candidates;
-        f[i]->numCandidates = 4;
-    }
-    
-    t1 = timestamp();
-    node* curNode = composeGraph(f, 1);
-    t1 = timestamp() - t1;
-
-    for (int i = 0; i < 1000; i++) {
-        edge* tmp = curNode->edgeList;
-        for (int j = 0; j < curNode->numEdges; j++) {
-            tmp 
-        }
-    }
-    
-    return 0;
 }
