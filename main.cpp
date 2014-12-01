@@ -3,9 +3,6 @@
 
 using namespace cv;
 
-#include "DetectBallCV.hpp"
-
-
 int MAX_CANDIDATES = 10;
 
 bool showImage = true; 
