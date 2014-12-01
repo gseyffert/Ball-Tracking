@@ -18,7 +18,7 @@ double fRand(double fMin, double fMax)
 }
 
 int main(int argc, char* argv[]){
-    int NUM_FRAMES = 100; //Number of frames to make
+    int NUM_FRAMES = 10; //Number of frames to make
     int MAX_FRAMES_PER_FRAME = 4; //Frames will have a number of candidates between [1,MAX_FRAMES_PER_FRAME]
 
     // Allocate all the frames
