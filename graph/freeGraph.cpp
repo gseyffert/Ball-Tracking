@@ -11,7 +11,7 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     cout << "Starting graph freeing" << endl;
 
     // Start by freeing the sink node, first get the sink node
-    edge* lastFrameEdgeList = frame[numFrames-1].nodes[0].edgeList;
+    edge* lastFrameEdgeList = listOfFrames[numFrames-1].nodes[0].edgeList;
     if(lastFrameEdgeList == NULL){
         cout << "Error: The first node in the last frame has a null edgelist when it should point to the sink node" << endl;
         return;
@@ -29,6 +29,7 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     // Start from end frame
     for(int i=numFrames-1; i>=0; i--){
         frame* curFrame = &listOfFrames[i];
+        int numCandidates = curFrame->numCandidates;
         cout << "Current frame: " << i << ", num nodes to free: " << numCandidates << endl;
 
         // go through each node and first free all the edges out of it
@@ -54,7 +55,7 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     // Now need to free source and all edges out of it
     cout << "Freeing source node" << endl;
     node* source = graph;
-    if(!source || !source.isSource){
+    if(!source || !(source->isStart)){
         cout << "Error: This may not be the correct source node" << endl;
         cout << "Source node: " << *source << endl;
         return;
