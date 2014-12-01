@@ -33,7 +33,7 @@ node* composeGraph(frame* frameArray, int numFrames){
 
     // Go through each frame
     for(int fNum = 0; fNum < numFrames; fNum++) {
-        cout << "Doing frame " << fnum << endl;
+        cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];
         numCandidates = curFrame->numCandidates;
         // Dealing with frame->frame edges (ie not source->frame)
@@ -108,7 +108,7 @@ node* composeGraph(frame* frameArray, int numFrames){
 
     // get last frame
     frame* lastFrame = &(frameArray[numFrames-1]);
-    int numPrevCandidates = lastFrame->numCandidates;
+    numPrevCandidates = lastFrame->numCandidates;
     
     // Now link the last frame's nodes to the sink node
     for(int prevCandNum = 0; prevCandNum < numPrevCandidates; prevCandNum++){
