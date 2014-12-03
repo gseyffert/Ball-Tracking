@@ -24,6 +24,7 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     }
 
     // Free the sink node
+    cout << "Freeing sink node" << endl;
     delete sink;
 
     // Start from end frame
