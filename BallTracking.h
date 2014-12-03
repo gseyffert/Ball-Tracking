@@ -90,6 +90,11 @@ typedef struct candidate{
 		this->radius = radius;
 		this->probability = prob;
 	} 
+	
+	friend ostream& operator<<(ostream& o, const candidate& c){
+		o << "(" << c.x << "," << c.y << "," << c.radius << "," << c.probability << ")";
+		return o;
+	}
 } candidate;
 
 // FRAME Struct
