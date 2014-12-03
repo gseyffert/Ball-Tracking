@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
                     return 0;
                 }
             }
-            curNode = curList.edgeList[0];
+            curNode = curList[0].end;
         } else {
             //Step through edgelists of nodes from previous frame
             for (int k = 0; k < f[i-1].numCandidates]; k++) {
