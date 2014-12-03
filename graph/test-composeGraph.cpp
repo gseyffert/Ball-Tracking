@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
             for (int k = 0; k < f[i].numCandidates; k++) {
                 curNode = &(f[i].nodes[k]);
                 edge* curList = curNode->edgeList;
-                if (curList[k].end->isSink != true) {
+                if (curList[0].end->isSink != true) {
                     cout << "Node should be pointing to sink " << *(curList[k].start);
                     return 0;
                 }
@@ -223,7 +223,7 @@ int main(int argc, char* argv[]){
 
     curNode = curNode->edgeList[0].end;
     cout << "Sink:" << endl;
-    cout << curNode << endl;
+    cout << *curNode << endl;
 
     // Free the graph after we are done
     curNode = source;
