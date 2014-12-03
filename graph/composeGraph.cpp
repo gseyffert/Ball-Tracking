@@ -104,7 +104,7 @@ node* composeGraph(frame* frameArray, int numFrames){
         }
         cout << "########" << endl << endl;
     }
-    cout << "Connecting source node" << endl;
+    cout << "Connecting sink node" << endl;
 
     // get last frame
     frame* lastFrame = &(frameArray[numFrames-1]);
