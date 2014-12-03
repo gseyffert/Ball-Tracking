@@ -46,8 +46,24 @@ int main(int argc, char* argv[]){
     // t1 = timestamp();
     node* curNode = composeGraph(f, NUM_FRAMES);
     // t1 = timestamp() - t1;
+    node* source = curNode;
+    
+    if (curNode.start != true) {
+        cout << "First node is not source";
+        return 0;
+    }
 
     for (int i = 0; i < NUM_FRAMES; i++) {
+        
+        for (k = 0; k < f[i].numCandidates; k++) {
+            //print all nodes
+            if (k == f[i].numCandidates - 1) {
+                cout << f[i].nodeList[k] << "\n";
+            } else {
+                cout << f[i].nodeList[k];
+            }
+        }
+        
         if (i == NUMFRAMES - 1) {
             for (int k = 0; k < f[i].numCandidates; k++) {
                 curNode = f[i].nodes[k];
@@ -57,41 +73,44 @@ int main(int argc, char* argv[]){
                     return 0;
                 }
             }
-        } else if (curNode.isStart) {
+        } else if (i == 0) {
             edge* curList = curNode.edgeList;
             for (int k = 0; k < f[i].numCandidates; k++) {
                 //Ensure equivalence of candidates in end nodes
-                if (curList[j].end.cand.x == f[i].candidateList[j].x) {
-                    cout << "Candidates in end node not equivalent";
+                if (curList[k].end == NULL) {
+                    cout << "End node is null in edge #: " << k << " at the course node";
                     return 0;
                 }
-                if (curList[j].end.cand.y == f[i].candidateList[j].y) {
-                    cout << "Candidates in end node not equivalent";
+                if (curList[k].end.cand.x == f[i].candidateList[k].x) {
+                    cout << "Candidates in end node not equivalent" << &curList[k].end;
                     return 0;
                 }
-                if (curList[j].end.cand.radius == f[i].candidateList[j].radius) {
-                    cout << "Candidates in end node not equivalent";
+                if (curList[k].end.cand.y == f[i].candidateList[k].y) {
+                    cout << "Candidates in end node not equivalent " << &curList[k].end;
                     return 0;
                 }
-                if (curList[j].end.cand.probability == f[i].candidateList[j].probability) {
-                    cout << "Candidates in end node not equivalent";
+                if (curList[k].end.cand.radius == f[i].candidateList[k].radius) {
+                    cout << "Candidates in end node not equivalent " << &curList[k].end;
+                    return 0;
+                }
+                if (curList[k].end.cand.probability == f[i].candidateList[k].probability) {
+                    cout << "Candidates in end node not equivalent " << &curList[k].end;
                     return 0; 
                 }
                 //Establish correctness of end node in current edge
-                if (curList[j].end.fnum != f[i].nodes[j].fnum) {
-                    cout << "Wrong frame number in end node " << curList[j].end;
+                if (curList[k].end.fnum != f[i].nodes[k].fnum) {
+                    cout << "Wrong frame number in end node " << &curList[k].end;
                     return 0;
                 }
-                if (curList[j].end.candidateNum != f[i].nodes[j].candidateNum) {
-                    cout << "Wrong candidate number in end node " << curList[j].end;
+                if (curList[k].end.candidateNum != f[i].nodes[k].candidateNum) {
+                    cout << "Wrong candidate number in end node " << &curList[k].end;
                     return 0;
                 }
-                if (curList[j].end.numEdges != f[i].nodes[j].numEdges) {
-                    cout << "Wrong edge count in end node " << curList[j].end;
+                if (curList[k].end.numEdges != f[i].nodes[k].numEdges) {
+                    cout << "Wrong edge count in end node " << &curList[k].end;
                     return 0;
                 }
             }
-            curNode = curList[0].end;
         } else {
             //Step through edgelists of nodes from previous frame
             for (int k = 0; k < f[i-1].numCandidates]; k++) {
@@ -102,63 +121,71 @@ int main(int argc, char* argv[]){
                 //ensure that edges were built correctly
                 for (int j = 0; j < f[i].numCandidates; j++) {
                     //Ensure equivalence of candidates stored in start nodes
+                    if (curList[j].start == NULL) {
+                        cout << "Start node is null in frame #: " << i << "edge #: " << j;
+                        return 0;
+                    }
+                    if (curList[j].end == NULL) {
+                        cout << "End node is null in frame #: " << i << "edge #: " << j;
+                        return 0;
+                    }
                     if (curList[j].start.cand.x == f[i-1].candidateList[k].x) {
-                        cout << "Candidates in start node not equivalent";
+                        cout << "Candidates in start node not equivalent " << &curList[j].start;
                         return 0;
                     }
                     if (curList[j].start.cand.y == f[i-1].candidateList[k].y) {
-                        cout << "Candidates in start node not equivalent";
+                        cout << "Candidates in start node not equivalent " << &curList[j].start;
                         return 0;
                     }
                     if (curList[j].start.cand.radius == f[i-1].candidateList[k].radius) {
-                        cout << "Candidates in start node not equivalent";
+                        cout << "Candidates in start node not equivalent " << &curList[j].start;
                         return 0;
                     }
                     if (curList[j].start.cand.probability == f[i-1].candidateList[k].probability) {
-                        cout << "Candidates in start node not equivalent";
+                        cout << "Candidates in start node not equivalent " << &curList[j].start;
                         return 0;
                     }
                     //Ensure equivalence of candidates in end nodes
                     if (curList[j].end.cand.x == f[i].candidateList[j].x) {
-                        cout << "Candidates in end node not equivalent";
+                        cout << "Candidates in end node not equivalent " << &curList[j].end;
                         return 0;
                     }
                     if (curList[j].end.cand.y == f[i].candidateList[j].y) {
-                        cout << "Candidates in end node not equivalent";
+                        cout << "Candidates in end node not equivalent " << &curList[j].end;
                         return 0;
                     }
                     if (curList[j].end.cand.radius == f[i].candidateList[j].radius) {
-                        cout << "Candidates in end node not equivalent";
+                        cout << "Candidates in end node not equivalent " << &curList[j].end;
                         return 0;
                     }
                     if (curList[j].end.cand.probability == f[i].candidateList[j].probability) {
-                        cout << "Candidates in end node not equivalent";
+                        cout << "Candidates in end node not equivalent " << &curList[j].end;
                         return 0; 
                     }
                     //Establish correctness of start node in current edge
                     if (curList[j].start.fnum != curNode.fnum) {
-                        cout << "Wrong frame number in start node " << curList[j].start;
+                        cout << "Wrong frame number in start node " << &curList[j].start;
                         return 0;
                     }
                     if (curList[j].start.candidateNum != curNode.candidateNum) {
-                        cout << "Wrong candidate number in start node " << curList[j].start;
+                        cout << "Wrong candidate number in start node " << &curList[j].start;
                         return 0;
                     }
                     if (curList[j].start.numEdges != start.numEdges) {
-                        cout << "Wrong edge count in start node " << curList[j].start;
+                        cout << "Wrong edge count in start node " << &curList[j].start;
                         return 0;
                     }
                     //Establish correctness of end node in current edge
                     if (curList[j].end.fnum != f[i].nodes[j].fnum) {
-                        cout << "Wrong frame number in end node " << curList[j].end;
+                        cout << "Wrong frame number in end node " << &curList[j].end;
                         return 0;
                     }
                     if (curList[j].end.candidateNum != f[i].nodes[j].candidateNum) {
-                        cout << "Wrong candidate number in end node " << curList[j].end;
+                        cout << "Wrong candidate number in end node " << &curList[j].end;
                         return 0;
                     }
                     if (curList[j].end.numEdges != f[i].nodes[j].numEdges) {
-                        cout << "Wrong edge count in end node " << curList[j].end;
+                        cout << "Wrong edge count in end node " << &curList[j].end;
                         return 0;
                     }
                     continue;
@@ -169,6 +196,7 @@ int main(int argc, char* argv[]){
     }
 
     // Free the graph after we are done
+    curNode = source;
     freeGraph(f, curNode, NUM_FRAMES);
 
     //Now free all the frames and candidates
