@@ -31,9 +31,10 @@ int cannyThreshold = cannyThresholdInitialValue;
 int accumulatorThreshold = accumulatorThresholdInitialValue;
 
 // booleans for speed
-const bool showImage = false;
+const bool showImage = true;
 const bool showTrackbars = false;
 const bool loopVideo = false;
+
 
 void on_trackbar( int, void* )
 {//This function gets called whenever a
@@ -95,19 +96,41 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
     }
 }
 
+void convertToGray(Mat& src, Mat& src_gray){
+
+    int tmp;
+    Vec3b color;
+    for(int i = 0;i < src.cols;i++){
+        for(int j = 0;j < src.rows;j++){
+            color = src.at<Vec3b>(j, i);
+            // bit mask for quick integer multiplication
+            tmp = color[0] << 1 ;
+            tmp += ( color[1] << 2 ) + color[1];
+            tmp += color[2];
+            src_gray.at<uchar>(j,i) = (unsigned char)(tmp >> 3);
+        }
+    }
+
+}
+
 void detectBall(Mat src, candidate* candidateArray) {
     /**
      * Takes in a Mat (image matrix) src and a pointer to an Array of Candidates
      * Returns void, but fills candidate Array with possible candidates
      */
 
-    Mat src_gray;
-    
-    // Convert it to gray
-    cvtColor( src, src_gray, COLOR_BGR2GRAY );
+    Mat src_gray(src.rows, src.cols, CV_8U);
 
+    Mat src_gray_CV;
+    
+
+    // Convert it to gray
+    cvtColor( src, src_gray_CV, COLOR_BGR2GRAY );
+
+    convertToGray(src, src_gray);
+    
     // Reduce the noise so we avoid false circle detection
-    GaussianBlur( src_gray, src_gray, Size(9, 9), 2, 2 );
+    // GaussianBlur( src_gray, src_gray, Size(9, 9), 2, 2 );
     
     // those paramaters cannot be =0
     // so we must check here
@@ -120,9 +143,6 @@ void detectBall(Mat src, candidate* candidateArray) {
     if(showImage){
         imshow(windowName,src);
         imshow(windowName + "Gray",src_gray);
-
-       //image will not appear without this waitKey() command
-        waitKey(1);
+        imshow(windowName + "Gray_CV",src_gray_CV);
     }
 }
-

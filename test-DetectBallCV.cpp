@@ -46,6 +46,10 @@ int main(int argc, char* argv[])
     //////////////////////////////////////////////////////////////////////
 
 
+    //image will not appear without this waitKey() command
+    if(showImage)
+        waitKey(0);
+
 
     //print candidates
     printCandidates(candidateArray);
