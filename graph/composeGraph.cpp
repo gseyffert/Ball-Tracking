@@ -36,6 +36,8 @@ node* composeGraph(frame* frameArray, int numFrames){
         cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];
         numCandidates = curFrame->numCandidates;
+        cout << "candidates: " << numCandidates << endl;
+
         // Dealing with frame->frame edges (ie not source->frame)
         if (fNum != 0) {
             // Get prev frames
