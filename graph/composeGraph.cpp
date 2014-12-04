@@ -36,7 +36,7 @@ node* composeGraph(frame* frameArray, int numFrames){
         cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];
         numCandidates = curFrame->numCandidates;
-        cout << "candidates: " << numCandidates << endl;
+        // cout << "candidates: " << numCandidates << endl;
 
         // Dealing with frame->frame edges (ie not source->frame)
         if (fNum != 0) {
@@ -59,10 +59,11 @@ node* composeGraph(frame* frameArray, int numFrames){
 
         // walkthrough the previous frames nodes and link them to this frames nodes
         for(int prevCandNum = 0; prevCandNum < numPrevCandidates; prevCandNum++){
-            cout << "connecting prevCand " << prevCandNum << endl;
+            // cout << "connecting prevCand " << prevCandNum << endl;
             node* prevFrameNode;
             // Handle the first frame where we are linking source node to the nodes in the first frame
             if(fNum == 0){
+                cout << "Connecting source" << endl;
                 prevFrameNode = source;
             }else{
                 prevFrameNode = &(prevFrame->nodes[prevCandNum]);
@@ -74,7 +75,7 @@ node* composeGraph(frame* frameArray, int numFrames){
 
             // Go through each candidate of current frame and create a node for it
             for(int curCandNum = 0; curCandNum < numCandidates; curCandNum++){
-                cout << "to cur cand num " << curCandNum << endl;
+                // cout << "to cur cand num " << curCandNum << endl;
                 // Get a pointer to this node so that we can more easily make edges to it
                 node* curNode = &(curFrame->nodes[curCandNum]);
 
@@ -102,9 +103,9 @@ node* composeGraph(frame* frameArray, int numFrames){
                     prevFrameNode->edgeList[curCandNum].weight = euclidianDistHeuristic(prevFrameNode, curNode);
                 }
             }
-            cout << "-----" << endl << endl;
+            // cout << "-----" << endl << endl;
         }
-        cout << "########" << endl << endl;
+        // cout << "########" << endl << endl;
     }
     cout << "Connecting sink node" << endl;
 

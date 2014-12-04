@@ -1,9 +1,13 @@
 /**
- * Composes Graph from individual frames
+ * Composes Graph from individual frames Parallelized w/ openMP
+ * We split composing into two parallelized steps
+ * 1. create all the nodes in the frames in parallel
+ * 2. link the nodes appropriately
  */
 
 #include "../BallTracking.h"
 #include <cmath> //sqrt, pow
+#include <omp.h> //openMp
 
 using namespace std;
 
@@ -24,6 +28,28 @@ node* composeGraph(frame* frameArray, int numFrames){
     sink->isSink = true;
     sink->edgeList = NULL; //Sink has no outgoing edges
     sink->numEdges = 0;
+
+    int NUM_THREADS = 8;
+
+    omp_set_num_threads(NUM_THREADS);
+
+    // First create all the nodes in parallel
+    #pragma omp parallel for shared(frameArray) schedule(dynamic)
+    for(int i = 0; i<numFrames; i++){
+        frameArray[i].nodes = new node[frameArray[i].numCandidates];
+    }
+
+    // check to make sure everything got allocated properly
+    for(int j = 0; j<numFrames; j++){
+        int numCands = frameArray[j].numCandidates;
+        if(!frameArray[j].nodes){
+            cout << "Node was not correctly allocated for idx " << j << endl;
+            return NULL;
+        }
+        // If this causes a segfault then th array was allocated an incorrect size
+        for(int k = 0; k<numCands; k++)
+            frameArray[j].nodes[k];
+    }
 
     //Initialize loop variables
     frame* curFrame, *prevFrame;
@@ -53,11 +79,11 @@ node* composeGraph(frame* frameArray, int numFrames){
         // Pointer to the current candidate
         candidate* curCand;
         // Allocate all the nodes for this frame
-        curFrame->nodes = new node[numCandidates];
+        // curFrame->nodes = new node[numCandidates];
 
         // walkthrough the previous frames nodes and link them to this frames nodes
         for(int prevCandNum = 0; prevCandNum < numPrevCandidates; prevCandNum++){
-            cout << "connecting prevCand " << prevCandNum << endl;
+            // cout << "connecting prevCand " << prevCandNum << endl;
             node* prevFrameNode;
             // Handle the first frame where we are linking source node to the nodes in the first frame
             if(fNum == 0){
@@ -72,7 +98,7 @@ node* composeGraph(frame* frameArray, int numFrames){
 
             // Go through each candidate of current frame and create a node for it
             for(int curCandNum = 0; curCandNum < numCandidates; curCandNum++){
-                cout << "to cur cand num " << curCandNum << endl;
+                // cout << "to cur cand num " << curCandNum << endl;
                 // Get a pointer to this node so that we can more easily make edges to it
                 node* curNode = &(curFrame->nodes[curCandNum]);
 
@@ -100,11 +126,11 @@ node* composeGraph(frame* frameArray, int numFrames){
                     prevFrameNode->edgeList[curCandNum].weight = euclidianDistHeuristic(prevFrameNode, curNode);
                 }
             }
-            cout << "-----" << endl << endl;
+            // cout << "-----" << endl << endl;
         }
-        cout << "########" << endl << endl;
+        // cout << "########" << endl << endl;
     }
-    cout << "Connecting sink node" << endl;
+    // cout << "Connecting sink node" << endl;
 
     // get last frame
     frame* lastFrame = &(frameArray[numFrames-1]);

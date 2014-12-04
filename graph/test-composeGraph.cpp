@@ -2,6 +2,7 @@
 
 #include "../BallTracking.h"
 #include <cstdlib>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -18,14 +19,14 @@ double fRand(double fMin, double fMax)
 }
 
 int main(int argc, char* argv[]){
-    int NUM_FRAMES = 10; //Number of frames to make
-    int MAX_FRAMES_PER_FRAME = 4; //Frames will have a number of candidates between [1,MAX_FRAMES_PER_FRAME]
+    int NUM_FRAMES = 700000; //Number of frames to make
+    int MAX_CANDIDATES_PER_FRAME = 30; //Frames will have a number of candidates between [1,MAX_CANDIDATES_PER_FRAME]
 
     // Allocate all the frames
     frame* f = new frame[NUM_FRAMES];
     for(int i=0; i<NUM_FRAMES; i++){
         // decide how many candidate for this frame
-        int numCands = rand() % (MAX_FRAMES_PER_FRAME+1) +1; //in range [1,MAX_FRAMES_PER_FRAME+1]
+        int numCands = rand() % (MAX_CANDIDATES_PER_FRAME+1) +1; //in range [1,MAX_CANDIDATES_PER_FRAME+1]
         candidate* candidates = new candidate[numCands];
 
         // Populate candidates array for this frame
@@ -43,9 +44,13 @@ int main(int argc, char* argv[]){
         f[i].nodes = NULL;
     }
 
-    // t1 = timestamp();
+    struct timeval tp1;
+    struct timeval tp2;
+    gettimeofday(&tp1, NULL);
     node* curNode = composeGraph(f, NUM_FRAMES);
-    // t1 = timestamp() - t1;
+    gettimeofday(&tp2, NULL);
+    long int start = tp1.tv_sec * 1000 + tp1.tv_usec / 1000;
+    long int end = tp2.tv_sec * 1000 + tp2.tv_usec / 1000;
     node* source = curNode;
     
     if (curNode->isStart != true) {
@@ -228,6 +233,9 @@ int main(int argc, char* argv[]){
     // Free the graph after we are done
     curNode = source;
     freeGraph(f, curNode, NUM_FRAMES);
+
+    cout << "compose Graph runtime: " << (end-start) << " ms" << endl;
+    cout << "For " << NUM_FRAMES << " frames and max " << MAX_CANDIDATES_PER_FRAME << " candidates per frame" << endl;
 
     //Now free all the frames and candidates
     for(int i=0; i<NUM_FRAMES; i++){

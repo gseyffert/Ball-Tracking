@@ -24,21 +24,21 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     }
 
     // Free the sink node
-    cout << "Freeing sink node" << endl;
+    // cout << "Freeing sink node" << endl;
     delete sink;
 
     // Start from end frame
     for(int i=numFrames-1; i>=0; i--){
         frame* curFrame = &listOfFrames[i];
         int numCandidates = curFrame->numCandidates;
-        cout << "Current frame: " << i << ", num nodes to free: " << numCandidates << endl;
+        // cout << "Current frame: " << i << ", num nodes to free: " << numCandidates << endl;
 
         // go through each node and first free all the edges out of it
         for(int j=0; j<numCandidates; j++){
             node* curNode = &(curFrame->nodes[j]);
-            cout << "current node: " << *curNode << endl;
+            // cout << "current node: " << *curNode << endl;
             // free each edge leaving that node before freeing the node itself
-            cout << "freeing edges" << endl;
+            // cout << "freeing edges" << endl;
             delete curNode->edgeList;
             // for(int k=0; k<curNode->numEdges; k++){
             //     cout << "freeing edge num " << k << endl;
@@ -46,15 +46,15 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
             //     delete curEdge;
             // }
         }
-        cout << "Freeing all nodes in the frame" << endl;
+        // cout << "Freein/g all nodes in the frame" << endl;
         delete curFrame->nodes;
         curFrame->nodes = NULL;
-        cout << "Successfully freed all nodes in frame " << i << endl;
-        cout << "\n" << endl;
+        // cout << "Succes/sfully freed all nodes in frame " << i << endl;
+        // cout << "\n" << endl;
     }
 
     // Now need to free source and all edges out of it
-    cout << "Freeing source node" << endl;
+    // cout << "Freeing source node" << endl;
     node* source = graph;
     if(!source || !(source->isStart)){
         cout << "Error: This may not be the correct source node" << endl;
@@ -63,7 +63,7 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     }
     delete source->edgeList;
     delete source;
-    cout << "Done freeing source" << endl;
+    // cout << "Done freeing source" << endl;
     // for(int i=0; i<source->numEdges; i++){
     //     cout << "Freeing edge " << i << endl;
     //     edge* cur
