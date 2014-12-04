@@ -36,24 +36,33 @@ int main(int argc, char* argv[])
     clock_t start;
     double duration;
     start = clock();
-    int num;
 
     // main function
-    detectBall(src, candidateArray);
+    detectBall(src, candidateArray, NAIVE);
+
+    //Compute time and print
+    duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+    printCandidates(candidateArray);
+    cout<<NAIVE<<" Total Time: "<< duration <<'\n';
+    //////////////////////////////////////////////////////////////////////
+    
+    //////////////////////////////// MAIN //////////////////////////////
+    // initialize clock
+    start = clock();
+
+    // main function
+    detectBall(src, candidateArray, OPEN_CV);
 
     //Compute time
     duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+    printCandidates(candidateArray);
+    cout<<OPEN_CV<<" Total Time: "<< duration <<'\n';
     //////////////////////////////////////////////////////////////////////
 
 
     //image will not appear without this waitKey() command
     if(showImage)
         waitKey(0);
-
-
-    //print candidates
-    printCandidates(candidateArray);
-    cout<<"Total Time: "<< duration <<'\n';
 
     return 0;
 }

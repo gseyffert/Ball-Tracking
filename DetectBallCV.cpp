@@ -7,9 +7,6 @@
 //#include <omp.h>
 #include "BallTracking.h"
 
-using namespace std;
-using namespace cv;
-
 //max number of objects to be detected in frame
 const int MAX_NUM_OBJECTS=3;
 //minimum and maximum object radius
@@ -31,10 +28,8 @@ int cannyThreshold = cannyThresholdInitialValue;
 int accumulatorThreshold = accumulatorThresholdInitialValue;
 
 // booleans for speed
-const bool showImage = true;
+const bool showImage = false;
 const bool showTrackbars = false;
-const bool loopVideo = false;
-
 
 void on_trackbar( int, void* )
 {//This function gets called whenever a
@@ -113,8 +108,6 @@ void convertToGray(Mat& src, Mat& src_gray){
 
 }
 
-
-// WORKS BUT TAKES A LOOOOONG TIME
 // source channel, target channel, width, height, radius
 void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
     float rs = ceil(r * 2.57);   // significant radius
@@ -127,86 +120,35 @@ void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
                     float y = min(h-1, max(0, iy));
                     float dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
                     float wght = exp( -dsq / (2*r*r) ) / (3*2*r*r);
-                    printf("%d\n", wght );
+                    // printf("%d\n", wght );
                     val += src.at<uchar>(y,x) * wght;  wsum += wght;
                 }
             dst.at<uchar>(i,j) = round(val/wsum);            
         }
 }
 
-
-// reflected indexing for border processing
-int reflect(int M, int x)
-{
-    if(x < 0)
-    {
-        return -x - 1;
-    }
-    if(x >= M)
-    {
-        return 2*M - x - 1;
-    }
-    return x;
-}
-
-void gaussBlur_1D(Mat& src, Mat& dst){
-          // coefficients of 1D gaussian kernel with sigma = 1
-      double coeffs[] = {0.0545, 0.2442, 0.4026, 0.2442, 0.0545};
-      
-      Mat temp;
-      
-      float sum, x1, y1;
-      
-      dst = src.clone();
-      temp = src.clone();
- 
-        // along y - direction
-        for(int y = 0; y < src.rows; y++){
-            for(int x = 0; x < src.cols; x++){
-                sum = 0.0;
-                for(int i = -2; i <= 2; i++){
-                    y1 = reflect(src.rows, y - i);
-                    sum = sum + coeffs[i + 2]*src.at<uchar>(y1, x);
-                }
-                temp.at<uchar>(y,x) = sum;
-            }
-        }
- 
-        // along x - direction
-        for(int y = 0; y < src.rows; y++){
-            for(int x = 0; x < src.cols; x++){
-                sum = 0.0;
-                for(int i = -2; i <= 2; i++){
-                    x1 = reflect(src.cols, x - i);
-                    sum = sum + coeffs[i + 2]*temp.at<uchar>(y, x1);
-                }
-                dst.at<uchar>(y,x) = sum;
-            }
-        }
-}
-
-void detectBall(Mat src, candidate* candidateArray) {
+void detectBall(Mat src, candidate* candidateArray, String type) {
     /**
      * Takes in a Mat (image matrix) src and a pointer to an Array of Candidates
      * Returns void, but fills candidate Array with possible candidates
      */
+    Mat src_gray;
+    if (type == OPEN_CV){
+        // Convert it to gray
+        cvtColor( src, src_gray, COLOR_BGR2GRAY );
+        // Reduce the noise so we avoid false circle detection
+        GaussianBlur( src_gray, src_gray, Size(9, 9), 2, 2 );
+    }
+    else if (type == NAIVE){
+        src_gray = Mat(src.rows, src.cols, CV_8U);
+        convertToGray(src, src_gray);
+        gaussBlur_Naive( src_gray, src_gray, src_gray.cols,  src_gray.rows, 2);
+    }
+    else if (type == OPTIMIZED){
+        // Optimized
+    }
 
-    Mat src_gray(src.rows, src.cols, CV_8U);
-
-    Mat src_gray_CV;
-    
-
-    // Convert it to gray
-    cvtColor( src, src_gray_CV, COLOR_BGR2GRAY );
-
-    convertToGray(src, src_gray);
-    
-    // Reduce the noise so we avoid false circle detection
-    GaussianBlur( src_gray_CV, src_gray_CV, Size(9, 9), 2, 2 );
-    gaussBlur_1D( src_gray, src_gray);
-
-    // those paramaters cannot be =0
-    // so we must check here
+    // those paramaters cannot be = 0 so we must check here
     cannyThreshold = max(cannyThreshold, 1);
     accumulatorThreshold = max(accumulatorThreshold, 1);
 
@@ -216,6 +158,5 @@ void detectBall(Mat src, candidate* candidateArray) {
     if(showImage){
         imshow(windowName,src);
         imshow(windowName + "Gray",src_gray);
-        imshow(windowName + "Gray_CV",src_gray_CV);
     }
 }

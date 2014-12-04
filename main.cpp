@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 				candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
 				
         // call detectBall 
-      	detectBall(currFrame, candidateArray);
+      	detectBall(currFrame, candidateArray, OPEN_CV);
 
         cap >> currFrame; // get a new frame from source video
 

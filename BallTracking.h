@@ -9,6 +9,14 @@
 using namespace std;
 using namespace cv;
 
+
+//////////////////////////
+// Optimization Types ////
+//////////////////////////
+const String OPEN_CV = "OpenCV";
+const String NAIVE = "Naive";
+const String OPTIMIZED = "Optimized";
+
 struct edge;
 struct candidate;
 struct node;
@@ -113,7 +121,7 @@ node* composeGraph(frame*, int);
 
 // Input: The filename for the jpeg and thresholds (to be decided)
 // Output: An array of frames where each frame contains the candidate positions for that frame
-void detectBall(Mat, candidate*);
+void detectBall(Mat, candidate*, String type);
 
 // Input: the graph of frame candidates for every frame + number of vertices in the graph
 // Output: a path where the returned pointer is the first node in the path and each node has only one edge out
