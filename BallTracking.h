@@ -24,32 +24,33 @@ struct frame;
 
 // NODE STRUCT
 typedef struct node{
-	int frameNum;
-	int candidateNum;
 	bool isStart; //Set this for node S
 	bool isSink;	 //Set this for node T
-	int numEdges;
+	int frameNum;
+	int candidateNum;
 	candidate* cand;
+	int numEdges;
 	edge* edgeList;
 	  
 	node(){
-		this->frameNum = -1;
-		this->candidateNum = -1;
-		this->numEdges = 0;
-		this->cand = NULL;
-		this->edgeList = NULL;
 		this->isStart = false;
 		this->isSink = false;
+		this->frameNum = -1;
+		this->candidateNum = -1;
+		this->cand = NULL;
+		this->numEdges = 0;
+		this->edgeList = NULL;
 	}  
 
 	node(int fnum, int cnum, candidate* c){
+		this->isStart = false;
+		this->isSink = false;
 		this->frameNum = fnum;
 		this->candidateNum = cnum;
 		this->cand = c;
 		this->numEdges = 0;
 		this->edgeList = NULL;
-		this->isSink = false;
-		this->isStart = false;
+
 	}
 
 	// You can print a node by doing cout << [node_var] and it will print (frameNum,candidateNum)
