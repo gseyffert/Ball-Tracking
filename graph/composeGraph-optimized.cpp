@@ -29,24 +29,45 @@ node* composeGraph(frame* frameArray, int numFrames){
     sink->edgeList = NULL; //Sink has no outgoing edges
     sink->numEdges = 0;
 
-    int NUM_THREADS = 8;
+    int NUM_THREADS = omp_get_max_threads();
+    candidate* curCand;
+    node* curNode;
+    int i,k,numEdges;
 
     omp_set_num_threads(NUM_THREADS);
 
     // First create all the nodes in parallel
-    #pragma omp parallel for shared(frameArray) schedule(dynamic)
-    for(int i = 0; i<numFrames; i++){
+    #pragma omp parallel for firstPrivate(frameArray, numFrames) private(i, k, numEdges, curNode) schedule(dynamic)
+    for (i = 0; i < numFrames; i++) {
+        //allocate node array in frame
         frameArray[i].nodes = new node[frameArray[i].numCandidates];
+        
+        //assign node fields
+        for (k = 0; k < frameArray[i].numCandidates; k++) {
+            curNode = &(frameArray[i].nodes[k]);
+            //# edges for curNode = number of candidates in next frame
+            //Only 1 edge for nodes in last frame (points to sink)
+            if (i == numFrames - 1) {
+                numEdges = 1;
+            } else {
+                numEdges = frameArray[i+1].numCandidates; 
+            }
+            curNode->frameNum = i;
+            curNode->candidateNum = k;
+            curNode->cand = &(frameArray[i].candidateList[k]);
+            curNode->numEdges = numEdges;
+            curNode->edgeList = new edge[numEdges];
+        }
     }
 
     // check to make sure everything got allocated properly
-    for(int j = 0; j<numFrames; j++){
+    for (int j = 0; j<numFrames; j++) {
         int numCands = frameArray[j].numCandidates;
         if(!frameArray[j].nodes){
             cout << "Node was not correctly allocated for idx " << j << endl;
             return NULL;
         }
-        // If this causes a segfault then th array was allocated an incorrect size
+        // If this causes a segfault then the array was allocated an incorrect size
         for(int k = 0; k<numCands; k++)
             frameArray[j].nodes[k];
     }
@@ -76,10 +97,6 @@ node* composeGraph(frame* frameArray, int numFrames){
         }
         
         candidate* candidateArray = curFrame->candidateList;
-        // Pointer to the current candidate
-        candidate* curCand;
-        // Allocate all the nodes for this frame
-        // curFrame->nodes = new node[numCandidates];
 
         // walkthrough the previous frames nodes and link them to this frames nodes
         for(int prevCandNum = 0; prevCandNum < numPrevCandidates; prevCandNum++){
@@ -102,22 +119,12 @@ node* composeGraph(frame* frameArray, int numFrames){
                 // Get a pointer to this node so that we can more easily make edges to it
                 node* curNode = &(curFrame->nodes[curCandNum]);
 
-                // Only do this once, on the first iteration of k
-                if(prevCandNum == 0){
-                    // Get the candidate that this node represents
-                    curCand = &candidateArray[curCandNum];
-                    
-                    // Set the fields of the current frame's node
-                    curNode->frameNum = fNum;
-                    curNode->candidateNum = curCandNum;
-                    curNode->cand = curCand;
-                }
-
                 // Link the prev frame node to all the current nodes by setting edge fields
                 prevFrameNode->edgeList[curCandNum].start = prevFrameNode;
                 prevFrameNode->edgeList[curCandNum].end = curNode;
 
-                // If the edge is fro source->frame then source won't have a candidate so just use the inverse of the confidence as the edge weight (smaller is better)
+                // If the edge is from source->frame then source won't have a candidate so just 
+                //use the inverse of the confidence as the edge weight (smaller is better)
                 if(fNum == 0){
                     double invConfidence = 1/(curNode->cand->probability);
                     prevFrameNode->edgeList[curCandNum].weight = invConfidence;
