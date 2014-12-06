@@ -15,7 +15,10 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 add_executable( DetectBallCV test-DetectBallCV.cpp )
 target_link_libraries( DetectBallCV ${OpenCV_LIBS} )
 
-add_executable( main main.cpp DetectBallCV.cpp graph/composeGraph.cpp graph/freeGraph.cpp graph/shortestPath.cpp )
+add_executable( Visualize test-Visualize.cpp )
+target_link_libraries( Visualize ${OpenCV_LIBS} )
+
+add_executable( main main.cpp DetectBallCV.cpp graph/composeGraph.cpp graph/freeGraph.cpp graph/shortestPath.cpp Visualize.cpp)
 target_link_libraries( main ${OpenCV_LIBS} )
 
 #add_executable( test-graph graph/composeGraph.cpp graph/test-composeGraph.cpp )

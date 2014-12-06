@@ -131,7 +131,7 @@ LinkedList<node*>* shortestPath(node* graph, int numVerts);
 
 // Input: the trajectory path in the form of a nodes array, also the source and output string names for the mp4 videos
 // Output: output mp4 video with the candidates drawn in a bounding box
-void visualize(LinkedList<node*>* trajectory, string srcVidMp4, string outputVidName);
+void visualize(LinkedList<node*>* trajectory, string srcVidMp4);
 
 // Frees all the memory allocated when we compose the graph
 // Input: the array of frames and number of frames

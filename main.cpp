@@ -87,6 +87,8 @@ int main(int argc, char** argv)
 			printf("(%d, %d, %d, %f)\n", tempCandidate->x, tempCandidate->y, tempCandidate->radius, tempCandidate->probability);
 	}
 
+    visualize(selectedCandidates, argv[1]);
+
 	freeGraph(frameList, graph, LEN_VIDEO);
 
     // the camera will be deinitialized automatically in VideoCapture destructor
