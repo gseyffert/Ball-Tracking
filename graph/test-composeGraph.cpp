@@ -19,8 +19,12 @@ double fRand(double fMin, double fMax)
 }
 
 int main(int argc, char* argv[]){
-    int NUM_FRAMES = 700000; //Number of frames to make
+    int NUM_FRAMES = 10000; //Number of frames to make
     int MAX_CANDIDATES_PER_FRAME = 30; //Frames will have a number of candidates between [1,MAX_CANDIDATES_PER_FRAME]
+
+    cout << "Running test-composeGraph with:" << endl;
+    cout << "Num Frames: " << NUM_FRAMES << endl;
+    cout << "Max Candidates per frame: " << MAX_CANDIDATES_PER_FRAME << endl;
 
     // Allocate all the frames
     frame* f = new frame[NUM_FRAMES];
@@ -52,21 +56,27 @@ int main(int argc, char* argv[]){
     long int start = tp1.tv_sec * 1000 + tp1.tv_usec / 1000;
     long int end = tp2.tv_sec * 1000 + tp2.tv_usec / 1000;
     node* source = curNode;
+
+    #define DEBUG 0
     
     if (curNode->isStart != true) {
         cout << "First node is not source";
         return 0;
     }
-    cout << "Source: " << endl;
-    cout << *curNode << endl;
+    if(DEBUG){
+        cout << "Source: " << endl;
+        cout << *curNode << endl;
+    }
 
     for (int i = 0; i < NUM_FRAMES; i++) {
         
-        for (int k = 0; k < f[i].numCandidates; k++) {
-            //print all nodes
-            cout << f[i].nodes[k] << " ";
+        if(DEBUG){
+            for (int k = 0; k < f[i].numCandidates; k++) {
+                //print all nodes
+                cout << f[i].nodes[k] << " ";
+            }
+            cout << endl;
         }
-        cout << endl;
         
         if (i == NUM_FRAMES - 1) {
             for (int k = 0; k < f[i].numCandidates; k++) {
@@ -227,8 +237,10 @@ int main(int argc, char* argv[]){
     }
 
     curNode = curNode->edgeList[0].end;
-    cout << "Sink:" << endl;
-    cout << *curNode << endl;
+    if(DEBUG){
+        cout << "Sink:" << endl;
+        cout << *curNode << endl;
+    }
 
     // Free the graph after we are done
     curNode = source;

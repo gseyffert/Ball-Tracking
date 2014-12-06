@@ -63,7 +63,7 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames){
     }
     delete source->edgeList;
     delete source;
-    // cout << "Done freeing source" << endl;
+    cout << "Done freeing graph" << endl;
     // for(int i=0; i<source->numEdges; i++){
     //     cout << "Freeing edge " << i << endl;
     //     edge* cur
