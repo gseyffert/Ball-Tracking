@@ -37,7 +37,7 @@ node* composeGraph(frame* frameArray, int numFrames){
     omp_set_num_threads(NUM_THREADS);
 
     // First create all the nodes in parallel
-    #pragma omp parallel for firstPrivate(frameArray, numFrames) private(i, k, numEdges, curNode) schedule(dynamic)
+    #pragma omp parallel for private(i, k, numEdges, curNode) schedule(dynamic)
     for (i = 0; i < numFrames; i++) {
         //allocate node array in frame
         frameArray[i].nodes = new node[frameArray[i].numCandidates];
@@ -72,6 +72,8 @@ node* composeGraph(frame* frameArray, int numFrames){
             frameArray[j].nodes[k];
     }
 
+    cout << "Looks like it got allocated properly" << endl;
+
     //Initialize loop variables
     frame* curFrame, *prevFrame;
 
@@ -79,8 +81,9 @@ node* composeGraph(frame* frameArray, int numFrames){
     int numPrevCandidates, numCandidates;
 
     // Go through each frame
+    
     for(int fNum = 0; fNum < numFrames; fNum++) {
-        cout << "Doing frame " << fNum << endl;
+        // cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];
         numCandidates = curFrame->numCandidates;
         // Dealing with frame->frame edges (ie not source->frame)
