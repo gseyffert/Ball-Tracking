@@ -40,11 +40,6 @@ void on_trackbar( int, void* )
 ////////////////////////
 // HELPER FUNCTIONS ////
 ////////////////////////
-String intToString(int number){
-    stringstream ss;
-    ss << number;
-    return ss.str();
-}
 
 void printCandidates(candidate* candidateArray){
         printf("(x, y, radius, probability)\n");

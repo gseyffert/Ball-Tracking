@@ -6,6 +6,14 @@
 #include <ctime>
 #include "BallTracking.h"
 
+////////////////////////
+// HELPER FUNCTIONS ////
+////////////////////////
+String intToString(int number){
+    stringstream ss;
+    ss << number;
+    return ss.str();
+}
 
 void draw(Mat& src, node* myNode)
 {
@@ -14,6 +22,7 @@ void draw(Mat& src, node* myNode)
     int x = cand->x;
     int y = cand->y;
     int radius = cand->radius;
+    printf("X: %d Y: %d Radius: %d \n", x, y, radius);
 
     Point center(x, y);
     // circle center
@@ -35,38 +44,38 @@ void visualize(LinkedList<node*>* trajectory, string srcVidMp4){
         printf("Video File not found!\n");
         return;
     }
-
-    string::size_type pAt = srcVidMp4.find_last_of('.');                  // Find extension point
-    const string NAME = srcVidMp4.substr(0, pAt) + "-Tracked" + ".avi";   // Form the new name with container
-    int ex = static_cast<int>(cap.get(CAP_PROP_FOURCC));     // Get Codec Type- Int form
-
-    // Transform from int to char via Bitwise operators
-    char EXT[] = {(char)(ex & 0XFF) , (char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24), 0};
-
-    Size S = Size((int) cap.get(CAP_PROP_FRAME_WIDTH),    // Acquire input size
-                  (int) cap.get(CAP_PROP_FRAME_HEIGHT));
-
     int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
 
-    VideoWriter outputVideo; // Open the output
-    outputVideo.open(NAME, ex, cap.get(CAP_PROP_FPS), S, true);
+    /////////////    VIDEO WRITER   ////////////////////////
+    // string::size_type pAt = srcVidMp4.find_last_of('.');                  // Find extension point
+    // const string NAME = srcVidMp4.substr(0, pAt) + "-Tracked" + ".avi";   // Form the new name with container
+    // int ex = static_cast<int>(cap.get(CAP_PROP_FOURCC));     // Get Codec Type- Int form
 
-    if (!outputVideo.isOpened())
-    {
-        cout  << "Could not open the output video for write: ";
-        return;
-    }
+    // // Transform from int to char via Bitwise operators
+    // char EXT[] = {(char)(ex & 0XFF) , (char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24), 0};
 
-    Mat currFrame, res;
+    // Size S = Size((int) cap.get(CAP_PROP_FRAME_WIDTH),    // Acquire input size
+    //               (int) cap.get(CAP_PROP_FRAME_HEIGHT));
+
+    // // VideoWriter outputVideo; // Open the output
+    // // outputVideo.open(NAME, ex, cap.get(CAP_PROP_FPS), S, true);
+    // VideoWriter outputVideo("out.avi",static_cast<int>(cap.get(CAP_PROP_FOURCC)),10, S,true);
+    // if (!outputVideo.isOpened())
+    // {
+    //     cout  << "Could not open the output video for write: ";
+    //     return;
+    // }
+
+    Mat currFrame;
     vector<Mat> spl;
-    cap >> currFrame; // load the first frame of the source video
-        
     int i = 0;
     node* myNode;
+    string picName;
     for(;;) //Show the image captured in the window and repeat
     {
-        cap >> currFrame;              // read
+        cap >> currFrame; // read
         if (currFrame.empty()){  // check if at end
+            cout  << "Frame Empty\n";
             break;
         }
         if (i >= LEN_VIDEO){
@@ -78,9 +87,13 @@ void visualize(LinkedList<node*>* trajectory, string srcVidMp4){
         draw(currFrame, myNode);
 
         //save
-        outputVideo << res;
+        // outputVideo.write(currFrame);
+        // outputVideo << currFrame;
+
+        picName = "output/" +  intToString(i) + ".jpg";
+        imwrite(picName, currFrame);
         i++;
     }
 
-    cout << "Finished draw visuals";
+    cout << "Finished drawing\n";
 }
