@@ -81,6 +81,7 @@ node* composeGraph(frame* frameArray, int numFrames){
     int numPrevCandidates, numCandidates;
 
     // Go through each frame
+    
     for(int fNum = 0; fNum < numFrames; fNum++) {
         // cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];

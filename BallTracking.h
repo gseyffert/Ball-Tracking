@@ -3,19 +3,19 @@
 
 #include<string>
 #include<iostream>
-// #include "opencv2/opencv.hpp"
+#include "opencv2/opencv.hpp"
 #include "utils/LinkedList.cpp"
 
 using namespace std;
-// using namespace cv;
+using namespace cv;
 
 
 //////////////////////////
 // Optimization Types ////
 //////////////////////////
-// const String OPEN_CV = "OpenCV";
-// const String NAIVE = "Naive";
-// const String OPTIMIZED = "Optimized";
+const String OPEN_CV = "OpenCV";
+const String NAIVE = "Naive";
+const String OPTIMIZED = "Optimized";
 
 struct edge;
 struct candidate;
@@ -122,7 +122,7 @@ node* composeGraph(frame*, int);
 
 // Input: The filename for the jpeg and thresholds (to be decided)
 // Output: An array of frames where each frame contains the candidate positions for that frame
-// void detectBall(Mat, candidate*, String type, int*);
+void detectBall(Mat, candidate*, String type, int*);
 
 // Input: the graph of frame candidates for every frame + number of vertices in the graph
 // Output: a path where the returned pointer is the first node in the path and each node has only one edge out
