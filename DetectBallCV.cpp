@@ -55,7 +55,7 @@ void printCandidates(candidate* candidateArray){
 }
 //////////////////////////
 
-void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulatorThreshold, candidate* candidateArray)
+void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulatorThreshold, candidate* candidateArray, int* numCandidates)
 {
     // will hold the results of the detection
     vector<Vec3f> circles;
@@ -64,6 +64,7 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
 
     // clone the colour, input image for displaying purposes
     int size = min((int)circles.size(), MAX_NUM_OBJECTS);
+	*numCandidates = size;
 
     //no feature/circle found
     if (size == 0){
@@ -127,7 +128,7 @@ void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
         }
 }
 
-void detectBall(Mat src, candidate* candidateArray, String type) {
+void detectBall(Mat src, candidate* candidateArray, String type, int* numCandidates) {
     /**
      * Takes in a Mat (image matrix) src and a pointer to an Array of Candidates
      * Returns void, but fills candidate Array with possible candidates
@@ -153,7 +154,7 @@ void detectBall(Mat src, candidate* candidateArray, String type) {
     accumulatorThreshold = max(accumulatorThreshold, 1);
 
     //runs the detection, and update the display
-    HoughDetection(src_gray, src, cannyThreshold, accumulatorThreshold, candidateArray);
+    HoughDetection(src_gray, src, cannyThreshold, accumulatorThreshold, candidateArray, numCandidates);
 
     if(showImage){
         imshow(windowName,src);

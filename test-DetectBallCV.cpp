@@ -36,9 +36,11 @@ int main(int argc, char* argv[])
     clock_t start;
     double duration;
     start = clock();
+		
+		int numCandidates;
 
     // main function
-    detectBall(src, candidateArray, NAIVE);
+    detectBall(src, candidateArray, NAIVE, &numCandidates);
 
     //Compute time and print
     duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
@@ -51,7 +53,7 @@ int main(int argc, char* argv[])
     start = clock();
 
     // main function
-    detectBall(src, candidateArray, OPEN_CV);
+    detectBall(src, candidateArray, OPEN_CV, &numCandidates);
 
     //Compute time
     duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;

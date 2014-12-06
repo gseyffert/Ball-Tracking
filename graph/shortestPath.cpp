@@ -116,6 +116,7 @@ LinkedList<node*>* shortestPath(node* graph, int numVerts){
     node* curNode = cur->item;
     while(curNode != NULL){
         pair<int,int> key (curNode->frameNum, curNode->candidateNum);
+        if (curNode->isStart) break;
         output->insertFront(curNode);
         curNode = prev[key];
     }    
