@@ -120,6 +120,8 @@ typedef struct frame {
 // Output: the source node of the graph (ie the start point)
 node* composeGraph(frame*, int);
 
+node* composeGraphOptimized(frame*, int);
+
 // Input: The filename for the jpeg and thresholds (to be decided)
 // Output: An array of frames where each frame contains the candidate positions for that frame
 void detectBall(Mat, candidate*, String type, int*);

@@ -50,11 +50,18 @@ int main(int argc, char* argv[]){
 
     struct timeval tp1;
     struct timeval tp2;
+    struct timeval tp3;
+    struct timeval tp4;
     gettimeofday(&tp1, NULL);
     node* curNode = composeGraph(f, NUM_FRAMES);
     gettimeofday(&tp2, NULL);
-    long int start = tp1.tv_sec * 1000 + tp1.tv_usec / 1000;
-    long int end = tp2.tv_sec * 1000 + tp2.tv_usec / 1000;
+    long int start1 = tp1.tv_sec * 1000 + tp1.tv_usec / 1000;
+    long int end1 = tp2.tv_sec * 1000 + tp2.tv_usec / 1000;
+    gettimeofday(&tp3, NULL);
+    curNode = composeGraphOptimized(f, NUM_FRAMES);
+    gettimeofday(&tp4, NULL);
+    long int start2 = tp3.tv_sec * 1000 + tp3.tv_usec / 1000;
+    long int end2 = tp4.tv_sec * 1000 + tp4.tv_usec / 1000;
     node* source = curNode;
 
     #define DEBUG 0
@@ -250,7 +257,8 @@ int main(int argc, char* argv[]){
     curNode = source;
     freeGraph(f, curNode, NUM_FRAMES);
 
-    cout << "compose Graph runtime: " << (end-start) << " ms" << endl;
+    cout << "Compose Graph runtime: " << (end1-start1) << " ms" << endl;
+    cout << "Compose Graph Optimized runtime: " << (end2-start2) << " ms" << endl;
     cout << "For " << NUM_FRAMES << " frames and max " << MAX_CANDIDATES_PER_FRAME << " candidates per frame" << endl;
 
     //Now free all the frames and candidates
