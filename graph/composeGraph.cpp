@@ -33,7 +33,7 @@ node* composeGraph(frame* frameArray, int numFrames){
 
     // Go through each frame
     for(int fNum = 0; fNum < numFrames; fNum++) {
-        cout << "Doing frame " << fNum << endl;
+        // cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];
         numCandidates = curFrame->numCandidates;
         // cout << "candidates: " << numCandidates << endl;

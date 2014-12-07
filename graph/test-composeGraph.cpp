@@ -68,6 +68,8 @@ int main(int argc, char* argv[]){
         cout << *curNode << endl;
     }
 
+    cout << "Checking correctness" << endl;
+
     for (int i = 0; i < NUM_FRAMES; i++) {
         
         if(DEBUG){
@@ -241,6 +243,8 @@ int main(int argc, char* argv[]){
         cout << "Sink:" << endl;
         cout << *curNode << endl;
     }
+
+    cout << "Everything looks good" << endl;
 
     // Free the graph after we are done
     curNode = source;

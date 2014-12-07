@@ -1,0 +1,7 @@
+timings.txt
+
+composeGraph naive:
+-10000 frames, 30 cands per frame : 2086ms
+
+composeGraph openMP:
+-

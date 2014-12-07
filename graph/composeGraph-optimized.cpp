@@ -22,14 +22,14 @@ node* composeGraph(frame* frameArray, int numFrames){
     node* source = new node();
     source->isStart = true;
     source->numEdges = frameArray[0].numCandidates;
-    source->edgeList = NULL; //Gets created when we process frame0 and create nodes for frame 0
+    source->edgeList = new edge[source->numEdges]; //Gets created when we process frame0 and create nodes for frame 0
 
     node* sink = new node();
     sink->isSink = true;
     sink->edgeList = NULL; //Sink has no outgoing edges
     sink->numEdges = 0;
 
-    int NUM_THREADS = omp_get_max_threads();
+    int NUM_THREADS = 8;//omp_get_max_threads();
     candidate* curCand;
     node* curNode;
     int i,k,numEdges;
@@ -39,6 +39,7 @@ node* composeGraph(frame* frameArray, int numFrames){
     // First create all the nodes in parallel
     #pragma omp parallel for private(i, k, numEdges, curNode) schedule(dynamic)
     for (i = 0; i < numFrames; i++) {
+        // if(i == 0) cout << "Got " << omp_get_num_threads() << " threads" << endl;
         //allocate node array in frame
         frameArray[i].nodes = new node[frameArray[i].numCandidates];
         
@@ -60,19 +61,19 @@ node* composeGraph(frame* frameArray, int numFrames){
         }
     }
 
-    // check to make sure everything got allocated properly
-    for (int j = 0; j<numFrames; j++) {
-        int numCands = frameArray[j].numCandidates;
-        if(!frameArray[j].nodes){
-            cout << "Node was not correctly allocated for idx " << j << endl;
-            return NULL;
-        }
-        // If this causes a segfault then the array was allocated an incorrect size
-        for(int k = 0; k<numCands; k++)
-            frameArray[j].nodes[k];
-    }
+    // // check to make sure everything got allocated properly
+    // for (int j = 0; j<numFrames; j++) {
+    //     int numCands = frameArray[j].numCandidates;
+    //     if(!frameArray[j].nodes){
+    //         cout << "Node was not correctly allocated for idx " << j << endl;
+    //         return NULL;
+    //     }
+    //     // If this causes a segfault then the array was allocated an incorrect size
+    //     for(int k = 0; k<numCands; k++)
+    //         frameArray[j].nodes[k];
+    // }
 
-    cout << "Looks like it got allocated properly" << endl;
+    // cout << "Looks like it got allocated properly" << endl;
 
     //Initialize loop variables
     frame* curFrame, *prevFrame;
@@ -80,9 +81,18 @@ node* composeGraph(frame* frameArray, int numFrames){
     // Number of candidates to walkthrough in the current and previous frames
     int numPrevCandidates, numCandidates;
 
+    // Will hold a pointer to the candidate array in each frame
+    candidate* candidateArray;
+
+    node* prevFrameNode;
+
+    // Loop iteration variables
+    int fNum, prevCandNum, curCandNum;
+
     // Go through each frame
-    
-    for(int fNum = 0; fNum < numFrames; fNum++) {
+    #pragma omp parallel for private(candidateArray, numPrevCandidates, numCandidates, curFrame, prevFrame, prevFrameNode, curNode, fNum, prevCandNum, curCandNum) schedule(dynamic)
+    for(fNum = 0; fNum < numFrames; fNum++) {
+        // if(fNum == 0) cout << "Got " << omp_get_num_threads() << " threads" << endl;
         // cout << "Doing frame " << fNum << endl;
         curFrame = &frameArray[fNum];
         numCandidates = curFrame->numCandidates;
@@ -99,28 +109,23 @@ node* composeGraph(frame* frameArray, int numFrames){
             numPrevCandidates = 1;
         }
         
-        candidate* candidateArray = curFrame->candidateList;
+        candidateArray = curFrame->candidateList;
 
         // walkthrough the previous frames nodes and link them to this frames nodes
-        for(int prevCandNum = 0; prevCandNum < numPrevCandidates; prevCandNum++){
+        for(prevCandNum = 0; prevCandNum < numPrevCandidates; prevCandNum++){
             // cout << "connecting prevCand " << prevCandNum << endl;
-            node* prevFrameNode;
             // Handle the first frame where we are linking source node to the nodes in the first frame
             if(fNum == 0){
                 prevFrameNode = source;
             }else{
                 prevFrameNode = &(prevFrame->nodes[prevCandNum]);
             }
-            // Set num edges to be the number of candidates in the current frame
-            prevFrameNode->numEdges = numCandidates;
-            // Allocate the edgelist for prev frame nodes
-            prevFrameNode->edgeList = new edge[numCandidates];
 
             // Go through each candidate of current frame and create a node for it
-            for(int curCandNum = 0; curCandNum < numCandidates; curCandNum++){
+            for(curCandNum = 0; curCandNum < numCandidates; curCandNum++){
                 // cout << "to cur cand num " << curCandNum << endl;
                 // Get a pointer to this node so that we can more easily make edges to it
-                node* curNode = &(curFrame->nodes[curCandNum]);
+                curNode = &(curFrame->nodes[curCandNum]);
 
                 // Link the prev frame node to all the current nodes by setting edge fields
                 prevFrameNode->edgeList[curCandNum].start = prevFrameNode;
