@@ -29,7 +29,7 @@ node* composeGraph(frame* frameArray, int numFrames){
     sink->edgeList = NULL; //Sink has no outgoing edges
     sink->numEdges = 0;
 
-    int NUM_THREADS = 8;//omp_get_max_threads();
+    int NUM_THREADS = 1;//omp_get_max_threads();
     candidate* curCand;
     node* curNode;
     int i,k,numEdges;
@@ -37,7 +37,7 @@ node* composeGraph(frame* frameArray, int numFrames){
     omp_set_num_threads(NUM_THREADS);
 
     // First create all the nodes in parallel
-    #pragma omp parallel for firstprivate(frameArray, numFrames) private(i, k, numEdges, curNode) schedule(dynamic)
+    #pragma omp parallel for firstprivate(frameArray) private(i, k, numEdges, curNode) schedule(dynamic)
     for (i = 0; i < numFrames; i++) {
         // if(i == 0) cout << "Got " << omp_get_num_threads() << " threads" << endl;
         //allocate node array in frame
@@ -90,7 +90,7 @@ node* composeGraph(frame* frameArray, int numFrames){
     int fNum, prevCandNum, curCandNum;
 
     // Go through each frame
-    #pragma omp parallel for firstprivate(frameArray, numFrames) private(candidateArray, numPrevCandidates, numCandidates, curFrame, prevFrame, prevFrameNode, curNode, fNum, prevCandNum, curCandNum) schedule(dynamic)
+    #pragma omp parallel for private(candidateArray, numPrevCandidates, numCandidates, curFrame, prevFrame, prevFrameNode, curNode, fNum, prevCandNum, curCandNum) schedule(dynamic)
     for(fNum = 0; fNum < numFrames; fNum++) {
         // if(fNum == 0) cout << "Got " << omp_get_num_threads() << " threads" << endl;
         // cout << "Doing frame " << fNum << endl;
