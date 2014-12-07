@@ -17,12 +17,12 @@ using namespace std;
  * @param  numFrames  number of frames (for bounds checking)
  * @return a pointer to the first node in the graph
  */
-node* composeGraph(frame* frameArray, int numFrames){
+node* composeGraphOptimized(frame* frameArray, int numFrames){
     // Create and initialize the source and sink nodes
-    node* source = new node();
-    source->isStart = true;
-    source->numEdges = frameArray[0].numCandidates;
-    source->edgeList = new edge[source->numEdges]; //Gets created when we process frame0 and create nodes for frame 0
+    node* source = new node(); source->isStart = true; source->numEdges =
+      frameArray[0].numCandidates; source->edgeList = new
+      edge[source->numEdges]; //Gets created when we process frame0 and create
+    nodes for frame 0
 
     node* sink = new node();
     sink->isSink = true;
