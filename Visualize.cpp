@@ -9,7 +9,7 @@
 ////////////////////////
 // HELPER FUNCTIONS ////
 ////////////////////////
-String intToString(int number){
+String intToStringg(int number){
     stringstream ss;
     ss << number;
     return ss.str();
@@ -90,7 +90,7 @@ void visualize(LinkedList<node*>* trajectory, string srcVidMp4){
         // outputVideo.write(currFrame);
         // outputVideo << currFrame;
 
-        picName = "output/" +  intToString(i) + ".jpg";
+        picName = "output/" +  intToStringg(i) + ".jpg";
         imwrite(picName, currFrame);
         i++;
     }

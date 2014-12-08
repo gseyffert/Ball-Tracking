@@ -1,4 +1,4 @@
-#include "DetectBallCV.cpp"
+#include "DetectBall.cpp"
 
 int main(int argc, char* argv[])
 {
