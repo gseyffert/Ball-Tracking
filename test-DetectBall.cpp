@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     //Compute time and print
     duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
     printCandidates(candidateArray);
-    cout<<NAIVE<<" Total Time: "<< duration <<'\n';
+    cout<<"Naive Total Time: "<< duration <<'\n';
     //////////////////////////////////////////////////////////////////////
     
     //////////////////////////////// MAIN //////////////////////////////
@@ -58,9 +58,21 @@ int main(int argc, char* argv[])
     //Compute time
     duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
     printCandidates(candidateArray);
-    cout<<OPEN_CV<<" Total Time: "<< duration <<'\n';
+    cout<<"Open CV Total Time: "<< duration <<'\n';
     //////////////////////////////////////////////////////////////////////
+    
+    //////////////////////////////// MAIN //////////////////////////////
+    // initialize clock
+    start = clock();
 
+    // main function
+    detectBall(src, candidateArray, OPTIMIZED, &numCandidates);
+
+    //Compute time
+    duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+    printCandidates(candidateArray);
+    cout<<"Optimized Total Time: "<< duration <<'\n';
+    //////////////////////////////////////////////////////////////////////
 
     //image will not appear without this waitKey() command
     if(showImage)
