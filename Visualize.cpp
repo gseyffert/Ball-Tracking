@@ -22,7 +22,7 @@ void draw(Mat& src, node* myNode)
     int x = cand->x;
     int y = cand->y;
     int radius = cand->radius;
-    printf("X: %d Y: %d Radius: %d \n", x, y, radius);
+    // printf("X: %d Y: %d Radius: %d \n", x, y, radius);
 
     Point center(x, y);
     // circle center
