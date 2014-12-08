@@ -35,8 +35,10 @@ node* composeGraphOptimized(frame* frameArray, int numFrames){
 
   omp_set_num_threads(NUM_THREADS);
 
+  cout << "Using " << NUM_THREADS << " threads" << endl;
+
   // First create all the nodes in parallel
-  #pragma omp parallel for firstprivate(frameArray, numFrames) private(i, k, numEdges, curNode) schedule(dynamic)
+  #pragma omp parallel for firstprivate(frameArray) private(i, k, numEdges, curNode) schedule(dynamic)
   for (i = 0; i < numFrames; i++) {
     //allocate node array in frame
     frameArray[i].nodes = new node[frameArray[i].numCandidates];
@@ -74,7 +76,7 @@ node* composeGraphOptimized(frame* frameArray, int numFrames){
   int fNum, prevCandNum, curCandNum;
 
   // Go through each frame
-  #pragma omp parallel for firstprivate(frameArray, numFrames) private(candidateArray, numPrevCandidates, numCandidates, curFrame, prevFrame, prevFrameNode, curNode, fNum, prevCandNum, curCandNum) schedule(dynamic)
+  #pragma omp parallel for private(candidateArray, numPrevCandidates, numCandidates, curFrame, prevFrame, prevFrameNode, curNode, fNum, prevCandNum, curCandNum) schedule(dynamic)
   for(fNum = 0; fNum < numFrames; fNum++) {
     curFrame = &frameArray[fNum];
     numCandidates = curFrame->numCandidates;

@@ -1,15 +1,6 @@
 timings.txt
 
 composeGraph naive:
--10000 frames, 30 cands per frame : 2086ms
-
-composeGraph openMP:
-with firstprivate(frameArray) on both loops
--8 threads: 2203ms
--4 threads: 2665ms
--1 thread: 2124ms
-
-with firstprivate(fameArray) only on first loop
--8 threads: 2265ms
--4 threads: 2218ms
--1 threads: 2079ms
+-100000 frames, 30 cands per frame : 22524ms 
+-8 threads: 3589ms
+-6.2x speed increase
