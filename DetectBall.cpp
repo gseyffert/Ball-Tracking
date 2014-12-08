@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
-//#include <omp.h>
+#include <omp.h>
 #include "BallTracking.h"
 
 //max number of objects to be detected in frame
@@ -83,11 +83,11 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
         candidateArray[i] = candidate(x, y, radius, 1); //x, y, radius, probability
 
         if(showImage){
-            Point center(x, y);
+            // Point center(x, y);
             // circle center
-            circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
+            // circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
             // circle outline
-            circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+            // circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
         }
     }
 }
@@ -138,22 +138,31 @@ void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
 }
 
 // source channel, target channel, width, height, radius
-void gaussBlur_Optimized(Mat src, Mat dst, int w, int h, int r) {
+void gaussBlur_Optimized(Mat src, int w, int h, int r) {
+    uchar *rowPtrSrc;
+    uchar *rowPtrDst;
+    int x,y,iy,ix,i,j;
+    float dsq, wght;
+    float val, wsum;
+
     float rs = ceil(r * 2.57);   // significant radius
-    for(int i=0; i < h; i++)
-        for(int j=0; j<w; j++) {
-            float val = 0, wsum = 0;
-            for(int iy = i-rs; iy<i+rs+1; iy++)
-                for(int ix = j-rs; ix<j+rs+1; ix++) {
-                    float x = min(w-1, max(0, ix));
-                    float y = min(h-1, max(0, iy));
-                    float dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
-                    float wght = exp( -dsq / (2*r*r) ) / (3*2*r*r);
-                    // printf("%d\n", wght );
-                    val += src.at<uchar>(y,x) * wght;  wsum += wght;
+    for(i=0; i < h; i++){
+        rowPtrDst= src.ptr<uchar>(i);
+        for(j=0; j<w; j++) {
+            val = 0, wsum = 0;
+            for(iy = i-rs; iy<i+rs+1; iy++) {
+                y = min(h-1, max(0, iy));
+                rowPtrSrc= src.ptr<uchar>(y);
+                for(ix = j-rs; ix<j+rs+1; ix++) {
+                    x = min(w-1, max(0, ix));
+                    dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
+                    wght = exp( -dsq / (2*r*r) ) / (3*2*r*r);
+                    val += rowPtrSrc[x] * wght;  wsum += wght;
                 }
-            dst.at<uchar>(i,j) = round(val/wsum);            
+            }
+            rowPtrDst[j] = round(val/wsum);            
         }
+    }
 }
 
 
@@ -177,7 +186,7 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     else if (type == OPTIMIZED){
         src_gray = Mat(src.rows, src.cols, CV_8U);
         convertToGray(src, src_gray);
-        gaussBlur_Optimized( src_gray, src_gray, src_gray.cols,  src_gray.rows, 2);
+        gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows, 2);
     }
 
     // those paramaters cannot be = 0 so we must check here

@@ -1,5 +1,7 @@
 #include "opencv2/opencv.hpp"
 #include "BallTracking.h"
+#include <time.h>
+#include <sys/time.h>
 
 using namespace cv;
 
@@ -9,9 +11,16 @@ const int MODE = OPEN_CV;
 
 bool showImage = false; 
 
+double timestamp()
+{
+	struct timeval tv;
+	gettimeofday (&tv, 0);
+	return tv.tv_sec + 1e-6*tv.tv_usec;
+}
+
+
 int main(int argc, char** argv)
 {
-
     if (argc != 2) { // check arguments
         printf("Incorrect Arguments: Specify a Source Video\n"); 
         return -1;
@@ -22,10 +31,11 @@ int main(int argc, char** argv)
     if (showImage) namedWindow("edges",1);
 
     if(!cap.isOpened()) { // check if we succeeded
-        printf("Video File %s not found!\n", argv[1]);
         return -1;
     }
 
+    double t0 = timestamp();    
+    
 	int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
 
     printf("Loaded %d frame video\n", LEN_VIDEO);
@@ -65,33 +75,43 @@ int main(int argc, char** argv)
             frameList[i].nodes = NULL;
         }
 
-        printf("%d: %d potential candidates detected\n", i, numCandidates);
+        //printf("%d: %d potential candidates detected\n", i, numCandidates);
 
 		totalCandidates += frameList[i].numCandidates;
         i++; 
     }
     
+    double t_afterDetect = timestamp() - t0;
+
     LEN_VIDEO = i;
 
 	node* graph = composeGraph(frameList, LEN_VIDEO);
 
+    double t_afterCompose = timestamp() - t0;
+
 	LinkedList<node*>* selectedCandidates = shortestPath(graph, totalCandidates);
+
+    double t_afterPath = timestamp() - t0; 
 
 	node* tempNode;
 	candidate* tempCandidate;
 
-    printf("Selected Candidates\n-------------------\n");
-
-	for (int i = 0; i < LEN_VIDEO; i++) {
-            printf("%d: ",i);
-			tempNode = (*selectedCandidates).getNode(i)->item;	
-			tempCandidate = tempNode->cand;
-			printf("(%d, %d, %d, %f)\n", tempCandidate->x, tempCandidate->y, tempCandidate->radius, tempCandidate->probability);
-	}
-
     visualize(selectedCandidates, argv[1]);
 
+    double t_afterVis = timestamp() - t0;
+
 	freeGraph(frameList, graph, LEN_VIDEO);
+
+    double t_afterFree = timestamp() - t0;
+
+    printf("Execution Completed for %d frame video:\n", LEN_VIDEO);
+    printf("Detect Ball   : %f elapsed ( %f %% )\n", t_afterDetect, 100*t_afterDetect/t_afterFree);
+    printf("Compose Graph : %f elapsed ( %f %% )\n", t_afterCompose - t_afterDetect, 100*(t_afterCompose - t_afterDetect)/t_afterFree);
+    printf("Shortest Path : %f elapsed ( %f %% ) \n", t_afterPath - t_afterCompose, 100*(t_afterPath - t_afterCompose)/t_afterFree);
+    printf("Visualize     : %f elapsed ( %f %% ) \n", t_afterVis - t_afterPath, 100*(t_afterVis - t_afterPath)/t_afterFree);
+    printf("Free Graph    : %f elapsed ( %f %% ) \n", t_afterFree - t_afterVis, 100*(t_afterFree - t_afterVis)/t_afterFree);
+    printf("--------------------------------\n");
+    printf("Total         : %f elapsed\n", t_afterFree);
 
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
