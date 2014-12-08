@@ -5,10 +5,13 @@ using namespace cv;
 
 int MAX_CANDIDATES = 10;
 
+const int MODE = OPEN_CV;
+
 bool showImage = false; 
 
 int main(int argc, char** argv)
 {
+
     if (argc != 2) { // check arguments
         printf("Incorrect Arguments: Specify a Source Video\n"); 
         return -1;
@@ -29,7 +32,6 @@ int main(int argc, char** argv)
 
     Mat currFrame;
     cap >> currFrame; // load the first frame of the source video
-		
 
     frame* frameList = new frame[LEN_VIDEO];
 
@@ -47,9 +49,9 @@ int main(int argc, char** argv)
 
 		// allocate candidate space
 		candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
-				
+
         // call detectBall 
-      	detectBall(currFrame, candidateArray, OPEN_CV, &numCandidates);
+      	detectBall(currFrame, candidateArray, MODE, &numCandidates);
 
         cap >> currFrame; // get a new frame from source video
 
@@ -63,7 +65,7 @@ int main(int argc, char** argv)
             frameList[i].nodes = NULL;
         }
 
-        printf("%d: %d CANDS\n", i, numCandidates);
+        printf("%d: %d potential candidates detected\n", i, numCandidates);
 
 		totalCandidates += frameList[i].numCandidates;
         i++; 
