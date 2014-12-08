@@ -17,7 +17,7 @@ using namespace std;
  * @param  numFrames  number of frames (for bounds checking)
  * @return a pointer to the first node in the graph
  */
-node* composeGraphOptimized(frame* frameArray, int numFrames){
+node* composeGraph(frame* frameArray, int numFrames){
   // Create and initialize the source and sink nodes
   node* source = new node(); source->isStart = true; 
   source->numEdges = frameArray[0].numCandidates; 
@@ -157,8 +157,7 @@ node* composeGraphOptimized(frame* frameArray, int numFrames){
  * @param  endNode   pointer to the destination node of the edge
  * @return           a decimal edge weight
  */
-/**
-  double euclidianDistHeuristic(node* startNode, node* endNode){
+double euclidianDistHeuristic(node* startNode, node* endNode){
   double val;
   candidate* startCand = startNode->cand;
   candidate* endCand = endNode->cand;
@@ -170,4 +169,3 @@ node* composeGraphOptimized(frame* frameArray, int numFrames){
   val = val * confidenceLevel;
   return val;
   }
-  */
