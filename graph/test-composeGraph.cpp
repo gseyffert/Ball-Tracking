@@ -19,7 +19,7 @@ double fRand(double fMin, double fMax)
 }
 
 int main(int argc, char* argv[]){
-    int NUM_FRAMES = 10000; //Number of frames to make
+    int NUM_FRAMES = 100000; //Number of frames to make
     int MAX_CANDIDATES_PER_FRAME = 30; //Frames will have a number of candidates between [1,MAX_CANDIDATES_PER_FRAME]
 
     cout << "Running test-composeGraph with:" << endl;
