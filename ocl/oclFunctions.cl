@@ -11,7 +11,7 @@ __kernel void toGray(__global uchar* in,
     size_t idx = get_global_id(0);
 
     int tmp;
-    int size = cols*(rows+rowStep)*channels;
+    int size = cols*rows*channels;
     for (int i = idx; i < size; i+=idx) {
         int index = channels * (i);
         uchar b = in[index];
