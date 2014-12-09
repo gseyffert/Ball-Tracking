@@ -153,5 +153,20 @@ void freeGraph(frame* listOfFrames, node* graph, int numFrames);
  */
 double euclidianDistHeuristic(node* startNode, node* endNode);
 
+/**
+ * Creates a video using ffmpeg from a sequence of images, need to pass in the pattern of the image file names using %d to indicate sequence numbers
+ * requires having ffmpeg installed and in the system path.
+ * Ex: runffmpeg("test\\putts\\%d.jpg", "test.mp4", "200", "720x400", "24");
+ * or runffmpeg("test\\putts\\%d.jpg", "test.mp4", "200"); which uses the default image size and framerate
+ * 
+ * @param  filePattern ex: img%d.jpg if images are named img1.jpg, img2.jpg,...,imgn.jpg
+ * @param  outName     the name of the output video
+ * @param  startNum    the number that the frames start at, ie if the first image is img100jpg then it should be 100
+ * @param  size        Resize the images before converting to a video, ie "720x400", if empty string then no resizinge (OPTIONAL)
+ * @param  framerate   Set the framerate, if -1 then use default ffmpeg framerate (OPTIONAL)
+ * @return             the return code of ffmpeg, 0 is good, anything else indicates something went wrong.
+ */
+int runffmpeg(string filePattern, string outName, string startNum, string size="", string framerate="");
+
 // main.cpp Does all the plumbing
 #endif
