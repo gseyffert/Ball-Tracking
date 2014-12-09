@@ -2,6 +2,7 @@
 #include "BallTracking.h"
 #include <time.h>
 #include <sys/time.h>
+#include <cstring>
 
 using namespace cv;
 
@@ -26,9 +27,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    VideoCapture cap(argv[1]); // open the specified video
+    string filename = argv[1];
 
-    if (showImage) namedWindow("edges",1);
+    VideoCapture cap(filename); // open the specified video
+
+    if (showImage) namedWindow("vid",1);
 
     if(!cap.isOpened()) { // check if we succeeded
         return -1;
@@ -53,7 +56,7 @@ int main(int argc, char** argv)
     {
 
         if (showImage) {
-            imshow("edges", currFrame);
+            imshow("vid", currFrame);
             waitKey(10);
         }
 
@@ -96,9 +99,13 @@ int main(int argc, char** argv)
 	node* tempNode;
 	candidate* tempCandidate;
 
-    visualize(selectedCandidates, argv[1]);
+    visualize(selectedCandidates, filename);
 
     double t_afterVis = timestamp() - t0;
+
+    runffmpeg("output/%d.jpg", "tracked.mp4", "1", "720x400", "24");
+
+    double t_afterFfmpeg = timestamp() - t0;
 
 	freeGraph(frameList, graph, LEN_VIDEO);
 
@@ -109,7 +116,8 @@ int main(int argc, char** argv)
     printf("Compose Graph : %f elapsed ( %f %% )\n", t_afterCompose - t_afterDetect, 100*(t_afterCompose - t_afterDetect)/t_afterFree);
     printf("Shortest Path : %f elapsed ( %f %% ) \n", t_afterPath - t_afterCompose, 100*(t_afterPath - t_afterCompose)/t_afterFree);
     printf("Visualize     : %f elapsed ( %f %% ) \n", t_afterVis - t_afterPath, 100*(t_afterVis - t_afterPath)/t_afterFree);
-    printf("Free Graph    : %f elapsed ( %f %% ) \n", t_afterFree - t_afterVis, 100*(t_afterFree - t_afterVis)/t_afterFree);
+    printf("ffmpeg        : %f elapsed ( %f %% ) \n", t_afterFfmpeg - t_afterVis, 100*(t_afterFfmpeg - t_afterVis)/t_afterFree);
+    printf("Free Graph    : %f elapsed ( %f %% ) \n", t_afterFree - t_afterFfmpeg, 100*(t_afterFree - t_afterFfmpeg)/t_afterFree);
     printf("--------------------------------\n");
     printf("Total         : %f elapsed\n", t_afterFree);
 

@@ -4,11 +4,16 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
-#include <omp.h>
+//#include <omp.h>
 #include "BallTracking.h"
 
+//PARAMS :
+// putts : 10,10,25
+// dribbles : 5,50,75
+
+
 //max number of objects to be detected in frame
-const int MAX_NUM_OBJECTS=3;
+const int MAX_NUM_OBJECTS=10;
 //minimum and maximum object radius
 const int MIN_OBJECT_RADIUS = 10;
 const int MAX_OBJECT_RADIUS = 25;
@@ -28,7 +33,7 @@ int cannyThreshold = cannyThresholdInitialValue;
 int accumulatorThreshold = accumulatorThresholdInitialValue;
 
 // booleans for speed
-const bool showImage = true;
+const bool showImage = false;
 const bool showTrackbars = false;
 
 void on_trackbar( int, void* )
@@ -83,11 +88,11 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
         candidateArray[i] = candidate(x, y, radius, 1); //x, y, radius, probability
 
         if(showImage){
-            // Point center(x, y);
-            // circle center
-            // circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
-            // circle outline
-            // circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+            Point center(x, y);
+            //circle center
+            circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
+            //circle outline
+            circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
         }
     }
 }
