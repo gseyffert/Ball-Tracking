@@ -26,9 +26,9 @@ void draw(Mat& src, node* myNode)
 
     Point center(x, y);
     // circle center
-    circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
+    // circle( src, center, 3, Scalar(0,255,0), -1, 8, 0 );
     // circle outline
-    circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
+    // circle( src, center, radius, Scalar(0,0,255), 3, 8, 0 );
 
 }
 
@@ -91,7 +91,7 @@ void visualize(LinkedList<node*>* trajectory, string srcVidMp4){
         // outputVideo << currFrame;
 
         picName = "output/" +  intToStringg(i) + ".jpg";
-        imwrite(picName, currFrame);
+        // imwrite(picName, currFrame);
         i++;
     }
 
