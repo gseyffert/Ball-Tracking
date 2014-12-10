@@ -14,7 +14,6 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
-<<<<<<< HEAD
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
@@ -22,7 +21,6 @@
 //#include <omp.h>
 =======
 // #include <omp.h>
->>>>>>> d70eb4e92de9fde5029d84a2e9f04e76bbd04dc1
 #include "BallTracking.h"
 #include "clhelp.h"
 #include "clhelp.cpp"
@@ -250,16 +248,11 @@ void gaussBlur_Optimized(Mat src, int w, int h) {
     int x,y,iy,ix,i,j;
     float dsq, wght;
     float val, wsum;
-
-<<<<<<< HEAD
     float rs = ceil( r * 2.57);   // significant radius
-    
-=======
     // significant radius = 6
     // w = num_columns, w = col
     // h = num_rows, i = row
     // #pragma omp parallel for num_threads(1)
->>>>>>> d70eb4e92de9fde5029d84a2e9f04e76bbd04dc1
     for(i=0; i < h; i++){
         rowPtrDst= src.ptr<uchar>(i);
         for(j=0; j<w; j++) {
@@ -369,13 +362,10 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     }
     else if (type == OPTIMIZED){
         src_gray = Mat(src.rows, src.cols, CV_8U);
-<<<<<<< HEAD
         convertToGray_Optimized(src, src_gray);
         gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows, 2);
-=======
         convertToGray(src, src_gray);
         gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows);
->>>>>>> d70eb4e92de9fde5029d84a2e9f04e76bbd04dc1
     }
 
     // those paramaters cannot be = 0 so we must check here
