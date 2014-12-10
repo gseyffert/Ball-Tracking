@@ -120,11 +120,8 @@ void oclToGray(cl_command_queue &queue,
   
    ::size_t local_work_size[1] = {128};
 
-  cl_int err = CL_SUCCESS;
-
-
-  
-  for (int i = 0; i < numFrames; i++) { 
+   cl_int err = CL_SUCCESS;
+   for (int i = 0; i < numFrames; i++) { 
     /*Mat curMat = src[i];
     Mat* destMat = new Mat();*/
     int rows = src[i].rows;
@@ -146,20 +143,22 @@ void oclToGray(cl_command_queue &queue,
     CHK_ERR(err);
 
 
-
     ::size_t global_work_size[1] = {(unsigned long)size};
-    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), (void *) &src);
+
+
+    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), &src);
     CHK_ERR(err); 
     err = clSetKernelArg(toGray, 1, sizeof(cl_mem), &dst);
     CHK_ERR(err);
-    err = clSetKernelArg(toGray, 2, sizeof(int), (void *) rows);
+    err = clSetKernelArg(toGray, 2, sizeof(int), &rows);
     CHK_ERR(err);
-    err = clSetKernelArg(toGray, 3, sizeof(int), (void *) cols);
+    err = clSetKernelArg(toGray, 3, sizeof(int), &cols);
     CHK_ERR(err);
     /*err = clSetKernelArg(toGray, 4, sizeof(int), &curMat.step);
     CHK_ERR(err);
     err = clSetKernelArg(toGray, 5, sizeof(int), curMat.oclchannels());
     CHK_ERR(err);*/
+
     err = clEnqueueNDRangeKernel(queue,
         toGray,
         1,
@@ -180,11 +179,18 @@ void oclToGray(cl_command_queue &queue,
                 array, 0, NULL, NULL);
     CHK_ERR(err);
 
+    
+    clReleaseMemObject(dst);
+    clReleaseMemObject(src); 
+ 
+
+
+
   }
 }
 
 void convertToGray_Optimized(Mat& src, Mat& src_gray){
-    
+
     std::string toGray_kernel_str;
     
 
@@ -193,13 +199,12 @@ void convertToGray_Optimized(Mat& src, Mat& src_gray){
      * and cl file that they're kept in */
     std::string toGray_name_str = std::string("toGray");
     std::string toGray_kernel_file = std::string("toGray.cl");
-    printf("BEFORE");
     cl_vars_t cv;
     cl_kernel toGray;
     
     /* Read OpenCL file into STL string */
     readFile(toGray_kernel_file, toGray_kernel_str);
-    
+
     /* Initialize the OpenCL runtime
      * Source in clhelp.cpp */
     initialize_ocl(cv);
@@ -209,7 +214,7 @@ void convertToGray_Optimized(Mat& src, Mat& src_gray){
                         toGray_name_str.c_str());
     
     oclToGray(cv.commands, cv.context, toGray, &src, &src_gray, 1);
-    
+
     err = clFlush(cv.commands);
     CHK_ERR(err);
     
@@ -271,7 +276,6 @@ void gaussBlur_Optimized(Mat src, int w, int h) {
     int x,y,iy,ix,i,j;
     float dsq, wght;
     float val, wsum;
-    float rs = ceil( 2 * 2.57);   // significant radius
     // significant radius = 6
     // w = num_columns, w = col
     // h = num_rows, i = row
@@ -385,6 +389,7 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     }
     else if (type == OPTIMIZED){
         src_gray = Mat(src.rows, src.cols, CV_8U);
+        cout<<"ENTERS LOOP\n";
         convertToGray_Optimized(src, src_gray);
         gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows);
     }
