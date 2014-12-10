@@ -41,3 +41,6 @@ main
 DetectBallCV
 Visualize
 output/*
+
+OpenCLUtilities/OCL-UtilitiesConfig.cmake
+
