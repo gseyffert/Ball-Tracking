@@ -33,7 +33,7 @@ void draw(Mat& src, node* myNode)
 }
 
 
-void visualize(LinkedList<node*>* trajectory, string srcVidMp4){
+void visualize(LinkedList<node*>* trajectory, string srcVidMp4, int length){
     /**
      * 
      */
@@ -44,7 +44,7 @@ void visualize(LinkedList<node*>* trajectory, string srcVidMp4){
         printf("Video File not found!\n");
         return;
     }
-    int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
+    int LEN_VIDEO = length;
 
     /////////////    VIDEO WRITER   ////////////////////////
     // string::size_type pAt = srcVidMp4.find_last_of('.');                  // Find extension point

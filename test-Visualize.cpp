@@ -11,7 +11,13 @@ int main(int argc, char* argv[])
     //read image to Mat
     LinkedList<node*>* o;
 
-    // populateNodes()
+    VideoCapture cap(argv[1]); // open the specified video
+
+    if(!cap.isOpened()) { // check if we succeeded
+        printf("Video File not found!\n");
+        return 0;
+    }
+    int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
     
     //////////////////////////////// MAIN //////////////////////////////
     // initialize clock
@@ -20,7 +26,7 @@ int main(int argc, char* argv[])
     start = clock();
 
     // main function
-    visualize(0, argv[1]);
+    visualize(0, argv[1], LEN_VIDEO);
 
     //Compute time and print
     duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;

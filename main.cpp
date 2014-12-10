@@ -11,7 +11,7 @@ int MAX_CANDIDATES = 10;
 
 const int MODE = OPEN_CV;
 
-#define showImage = 0; 
+#define showImage 0
 
 double timestamp()
 {
@@ -40,46 +40,47 @@ int main(int argc, char** argv)
 
     double t0 = timestamp();    
     
-		int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
+	int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
 
     printf("Loaded %d frame video\n", LEN_VIDEO);
 
-		Mat* videoBuffer = new Mat[LEN_VIDEO];
-
+	Mat* videoBuffer = new Mat[LEN_VIDEO];
+    printf("1\n");
     Mat currFrame;
     cap >> currFrame; // load the first frame of the source video
+    printf("2\n");
 
-		int i = 0;
+	int i = 0;
 
     while(!currFrame.empty())
     {
+
         if (showImage) {
-            imshow("vid", currFrame);
+            // imshow("vid", currFrame);
             waitKey(10);
         }
+		videoBuffer[i] = currFrame;
+        cap >> currFrame; // get a new frame from source video    
+        i++;
+	}
 
-        cap >> currFrame; // get a new frame from source video	
-
-				Mat[i] = currFrame;
-				i++;
-		}
-
-		LEN_VIDEO = i;
+	LEN_VIDEO = i;
 
     frame* frameList = new frame[LEN_VIDEO];
 
-		int totalCandidates = 0;
-		int numCandidates;
+	int totalCandidates = 0;
+	int numCandidates;
+    printf("6\n");
 
-		#pragma omp parallel for
-		for(i = 0; i < LEN_VIDEO; i++)
-    {
-				currFrame = videoBuffer[i]; 
+	#pragma omp parallel for num_threads(8)
+	for(i = 0; i < LEN_VIDEO; i++){
+		currFrame = videoBuffer[i]; 
 
-				// allocate candidate space
-				candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
+		// allocate candidate space
+		candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
 
-        // call detectBall 
+        // call detectBall
+        printf("7\n"); 
       	detectBall(currFrame, candidateArray, MODE, &numCandidates);
 
         if (numCandidates == 0) {
@@ -91,28 +92,30 @@ int main(int argc, char** argv)
             frameList[i].candidateList = candidateArray;
             frameList[i].nodes = NULL;
         }
-
+        printf("8\n");
         //printf("%d: %d potential candidates detected\n", i, numCandidates);
 
-				totalCandidates += frameList[i].numCandidates;
+    	totalCandidates += frameList[i].numCandidates;
     }
+    printf("9\n");
     
     double t_afterDetect = timestamp() - t0;
 
-    LEN_VIDEO = i;
-
+    printf("10\n");
 	node* graph = composeGraph(frameList, LEN_VIDEO);
 
     double t_afterCompose = timestamp() - t0;
-
+    printf("11\n");
 	LinkedList<node*>* selectedCandidates = shortestPath(graph, totalCandidates);
 
     double t_afterPath = timestamp() - t0; 
 
 	node* tempNode;
 	candidate* tempCandidate;
+    printf("12\n");
 
-    visualize(selectedCandidates, filename);
+    visualize(selectedCandidates, filename, LEN_VIDEO);
+    printf("13\n");
 
     double t_afterVis = timestamp() - t0;
 
@@ -120,7 +123,8 @@ int main(int argc, char** argv)
 
     double t_afterFfmpeg = timestamp() - t0;
 
-	freeGraph(frameList, graph, LEN_VIDEO);
+	freeGraph(frameList, graph, LEN_VIDEO-1);
+    printf("14\n");
 
     double t_afterFree = timestamp() - t0;
 
