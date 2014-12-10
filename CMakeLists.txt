@@ -10,10 +10,23 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -stdlib=libc++ -g")
 #    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 #endif()
 
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_subdirectory(OpenCLUtilities)
+include_directories(${OPENCL_INCLUDE_DIRS})
+
+
+# message(STATUS "OpenCL found: ${OPENCL_FOUND}")
+message(STATUS "OpenCL includes: ${OPENCL_INCLUDE_DIRS}")
+message(STATUS "OpenCL CXX includes: ${OPENCL_HAS_CPP_BINDINGS}")
+include_directories( ${OpenCV_INCLUDE_DIRS})
+
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/ocl/)
+message(STATUS "${CMAKE_SOURCE_DIR}")
+
 
 add_executable( DetectBall test-DetectBall.cpp )
 target_link_libraries( DetectBall ${OpenCV_LIBS} )
+target_link_libraries( DetectBall OCL-Utilities SIPL )
 
 add_executable( Visualize test-Visualize.cpp )
 target_link_libraries( Visualize ${OpenCV_LIBS} )
