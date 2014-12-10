@@ -22,10 +22,6 @@ message(STATUS "OpenCL CXX includes: ${OPENCL_HAS_CPP_BINDINGS}")
 include_directories( ${OpenCV_INCLUDE_DIRS})
 
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/ocl/)
-message(STATUS "${CMAKE_SOURCE_DIR}")
-
-
 add_executable( DetectBall test-DetectBall.cpp )
 target_link_libraries( DetectBall ${OpenCV_LIBS} )
 target_link_libraries( DetectBall OCL-Utilities SIPL )
@@ -37,3 +33,5 @@ add_executable( main main.cpp DetectBall.cpp graph/composeGraph.cpp graph/freeGr
 target_link_libraries( main ${OpenCV_LIBS} )
 
 #add_executable( test-graph graph/composeGraph.cpp graph/test-composeGraph.cpp )
+
+

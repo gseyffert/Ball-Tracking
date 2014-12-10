@@ -1,7 +1,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgcodecs.hpp"
-#include "ocl/ocl.hpp"
 #include "OpenCLUtilities/openCLUtilities.hpp"
 
 
@@ -19,7 +18,6 @@
 #include <cstdlib>
 #include <string>
 //#include <omp.h>
-=======
 // #include <omp.h>
 #include "BallTracking.h"
 #include "clhelp.h"
@@ -29,7 +27,6 @@
 // dribbles : 5,50,75
 
 using namespace cl;
-using namespace ocl;
 //max number of objects to be detected in frame
 const int MAX_NUM_OBJECTS=10;
 //minimum and maximum object radius
@@ -126,23 +123,44 @@ void oclToGray(cl_command_queue &queue,
 
   cl_int err = CL_SUCCESS;
 
-  for (int i = 0; i < numFrames; i++) { 
-    Mat curMat = ocl::oclMat(src[i]);
 
-    Mat destMat = ocl::oclMat();
-    ::size_t global_work_size[1] = {curMat.cols*curMat.rows};
-    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), (void *)&curMat.data);
+  
+  for (int i = 0; i < numFrames; i++) { 
+    /*Mat curMat = src[i];
+    Mat* destMat = new Mat();*/
+    int rows = src[i].rows;
+    int cols = src[i].cols;
+    int size = rows*cols;
+    uchar *array = new uchar[size];
+    if(src[i].isContinuous())
+        array = src[i].data;
+    cl_mem src, dst;
+
+    src = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
+    CHK_ERR(err);
+    dst = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
+    CHK_ERR(err);
+
+
+
+    err = clEnqueueWriteBuffer(queue, src, true, 0, sizeof(uchar)*size, array, 0, NULL, NULL);
+    CHK_ERR(err);
+
+
+
+    ::size_t global_work_size[1] = {(unsigned long)size};
+    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), (void *) &src);
     CHK_ERR(err); 
-    err = clSetKernelArg(toGray, 1, sizeof(cl_mem), (void *)&destMat.data);
+    err = clSetKernelArg(toGray, 1, sizeof(cl_mem), &dst);
     CHK_ERR(err);
-    err = clSetKernelArg(toGray, 2, sizeof(int), &curMat.rows);
+    err = clSetKernelArg(toGray, 2, sizeof(int), (void *) rows);
     CHK_ERR(err);
-    err = clSetKernelArg(toGray, 3, sizeof(int), &curMat.cols);
+    err = clSetKernelArg(toGray, 3, sizeof(int), (void *) cols);
     CHK_ERR(err);
-    err = clSetKernelArg(toGray, 4, sizeof(int), &curMat.step);
+    /*err = clSetKernelArg(toGray, 4, sizeof(int), &curMat.step);
     CHK_ERR(err);
     err = clSetKernelArg(toGray, 5, sizeof(int), curMat.oclchannels());
-    CHK_ERR(err);
+    CHK_ERR(err);*/
     err = clEnqueueNDRangeKernel(queue,
         toGray,
         1,
@@ -154,9 +172,15 @@ void oclToGray(cl_command_queue &queue,
         NULL
         );
     CHK_ERR(err);
-    src[i] = destMat.Mat();
+    /*src[i] = destMat.Mat();
     curMat.release();
-    destMat.release();
+    destMat.release();*/
+
+    /* Read result of GPU on host CPU */
+    err = clEnqueueReadBuffer(queue, src, true, 0, sizeof(uchar)*size,
+                array, 0, NULL, NULL);
+    CHK_ERR(err);
+
   }
 }
 
@@ -185,7 +209,7 @@ void convertToGray_Optimized(Mat& src, Mat& src_gray){
     compile_ocl_program(toGray, cv, toGray_kernel_str.c_str(),
                         toGray_name_str.c_str());
     
-    ocltoGray(cv.commands, cv.context, toGray, &src, &src_gray, 1);
+    oclToGray(cv.commands, cv.context, toGray, &src, &src_gray, 1);
     
     err = clFlush(cv.commands);
     CHK_ERR(err);
@@ -248,7 +272,7 @@ void gaussBlur_Optimized(Mat src, int w, int h) {
     int x,y,iy,ix,i,j;
     float dsq, wght;
     float val, wsum;
-    float rs = ceil( r * 2.57);   // significant radius
+    float rs = ceil( 2 * 2.57);   // significant radius
     // significant radius = 6
     // w = num_columns, w = col
     // h = num_rows, i = row
@@ -363,8 +387,6 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     else if (type == OPTIMIZED){
         src_gray = Mat(src.rows, src.cols, CV_8U);
         convertToGray_Optimized(src, src_gray);
-        gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows, 2);
-        convertToGray(src, src_gray);
         gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows);
     }
 
