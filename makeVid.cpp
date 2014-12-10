@@ -66,7 +66,7 @@ int runffmpeg(string filePattern, string outName, string startNum, string size/*
     cout << "executing command: " << endl;
     cout << command << endl << endl;
 
-    string c = "ffmpeg -start_number 200 -i "+filePattern+" -vcodec mpeg4 "+outName;
+    string c = "ffmpeg -y -start_number 200 -i "+filePattern+" -vcodec mpeg4 "+outName;
 
     int retCode = system(command.c_str());
 
