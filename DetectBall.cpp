@@ -1,17 +1,33 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/imgcodecs.hpp"
+#include "opencv2/ocl/ocl.hpp"
+#include "OpenCLUtilities/openCLUtilities.hpp"
+
+
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+//#include <opencv2/gpu/gpu.hpp>
 #include <iostream>
 #include <cstdio>
 #include <ctime>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
 //#include <omp.h>
 #include "BallTracking.h"
-
+#include "clhelp.h"
+#include "clhelp.cpp"
 //PARAMS :
 // putts : 10,10,25
 // dribbles : 5,50,75
 
-
+using namespace cl;
+using namespace ocl;
 //max number of objects to be detected in frame
 const int MAX_NUM_OBJECTS=10;
 //minimum and maximum object radius
@@ -97,22 +113,101 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
     }
 }
 
-void convertToGray(Mat& src, Mat& src_gray){
+void oclToGray(cl_command_queue &queue,
+               cl_context &context,
+               cl_kernel &toGray,
+               Mat* src, 
+               Mat* dest,
+               int numFrames) {
+  
+   ::size_t local_work_size[1] = {128};
 
+  cl_int err = CL_SUCCESS;
+
+  for (int i = 0; i < numFrames; i++) { 
+    Mat curMat = ocl::oclMat(src[i]);
+
+    Mat destMat = ocl::oclMat();
+    ::size_t global_work_size[1] = {curMat.cols*curMat.rows};
+    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), (void *)&curMat.data);
+    CHK_ERR(err); 
+    err = clSetKernelArg(toGray, 1, sizeof(cl_mem), (void *)&destMat.data);
+    CHK_ERR(err);
+    err = clSetKernelArg(toGray, 2, sizeof(int), &curMat.rows);
+    CHK_ERR(err);
+    err = clSetKernelArg(toGray, 3, sizeof(int), &curMat.cols);
+    CHK_ERR(err);
+    err = clSetKernelArg(toGray, 4, sizeof(int), &curMat.step);
+    CHK_ERR(err);
+    err = clSetKernelArg(toGray, 5, sizeof(int), curMat.oclchannels());
+    CHK_ERR(err);
+    err = clEnqueueNDRangeKernel(queue,
+        toGray,
+        1,
+        NULL,
+        global_work_size,
+        local_work_size,
+        0,
+        NULL,
+        NULL
+        );
+    CHK_ERR(err);
+    src[i] = destMat.Mat();
+    curMat.release();
+    destMat.release();
+  }
+}
+
+void convertToGray_Optimized(Mat& src, Mat& src_gray){
+    
+    std::string toGray_kernel_str;
+    
+
+    cl_int err = CL_SUCCESS;
+    /* Provide names of the OpenCL kernels
+     * and cl file that they're kept in */
+    std::string toGray_name_str = std::string("toGray");
+    std::string toGray_kernel_file = std::string("toGray.cl");
+    
+    cl_vars_t cv;
+    cl_kernel toGray;
+    
+    /* Read OpenCL file into STL string */
+    readFile(toGray_kernel_file, toGray_kernel_str);
+    
+    /* Initialize the OpenCL runtime
+     * Source in clhelp.cpp */
+    initialize_ocl(cv);
+    
+    /* Compile all OpenCL kernels */
+    compile_ocl_program(toGray, cv, toGray_kernel_str.c_str(),
+                        toGray_name_str.c_str());
+    
+    ocltoGray(cv.commands, cv.context, toGray, &src, &src_gray, 1);
+    
+    err = clFlush(cv.commands);
+    CHK_ERR(err);
+    
+    uninitialize_ocl(cv);
+
+}
+
+
+void convertToGray(Mat& src, Mat& src_gray) {
     int tmp;
     Vec3b color;
     for(int i = 0;i < src.cols;i++){
         for(int j = 0;j < src.rows;j++){
             color = src.at<Vec3b>(j, i);
-            // bit mask for quick integer multiplication
+            //bit mask for quick integer multiplication
             tmp = color[0] << 1 ;
             tmp += ( color[1] << 2 ) + color[1];
             tmp += color[2];
             src_gray.at<uchar>(j,i) = (unsigned char)(tmp >> 3);
         }
     }
-
 }
+
 
 // source channel, target channel, width, height, radius
 void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
@@ -150,7 +245,8 @@ void gaussBlur_Optimized(Mat src, int w, int h, int r) {
     float dsq, wght;
     float val, wsum;
 
-    float rs = ceil(r * 2.57);   // significant radius
+    float rs = ceil( r * 2.57);   // significant radius
+    
     for(i=0; i < h; i++){
         rowPtrDst= src.ptr<uchar>(i);
         for(j=0; j<w; j++) {
@@ -190,7 +286,7 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     }
     else if (type == OPTIMIZED){
         src_gray = Mat(src.rows, src.cols, CV_8U);
-        convertToGray(src, src_gray);
+        convertToGray_Optimized(src, src_gray);
         gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows, 2);
     }
 
