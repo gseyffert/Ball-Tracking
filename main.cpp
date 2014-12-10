@@ -3,6 +3,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <cstring>
+#include <omp.h>
 
 using namespace cv;
 
@@ -10,7 +11,7 @@ int MAX_CANDIDATES = 10;
 
 const int MODE = OPEN_CV;
 
-bool showImage = false; 
+#define showImage = 0; 
 
 double timestamp()
 {
@@ -39,34 +40,47 @@ int main(int argc, char** argv)
 
     double t0 = timestamp();    
     
-	int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
+		int LEN_VIDEO = cap.get(CAP_PROP_FRAME_COUNT);
 
     printf("Loaded %d frame video\n", LEN_VIDEO);
+
+		Mat* videoBuffer = new Mat[LEN_VIDEO];
 
     Mat currFrame;
     cap >> currFrame; // load the first frame of the source video
 
-    frame* frameList = new frame[LEN_VIDEO];
-
-    int i = 0;
-	int totalCandidates = 0;
-	int numCandidates;
+		int i = 0;
 
     while(!currFrame.empty())
     {
-
         if (showImage) {
             imshow("vid", currFrame);
             waitKey(10);
         }
 
-		// allocate candidate space
-		candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
+        cap >> currFrame; // get a new frame from source video	
+
+				Mat[i] = currFrame;
+				i++;
+		}
+
+		LEN_VIDEO = i;
+
+    frame* frameList = new frame[LEN_VIDEO];
+
+		int totalCandidates = 0;
+		int numCandidates;
+
+		#pragma omp parallel for
+		for(i = 0; i < LEN_VIDEO; i++)
+    {
+				currFrame = videoBuffer[i]; 
+
+				// allocate candidate space
+				candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
 
         // call detectBall 
       	detectBall(currFrame, candidateArray, MODE, &numCandidates);
-
-        cap >> currFrame; // get a new frame from source video
 
         if (numCandidates == 0) {
             if (i == 0) exit(1);
@@ -80,8 +94,7 @@ int main(int argc, char** argv)
 
         //printf("%d: %d potential candidates detected\n", i, numCandidates);
 
-		totalCandidates += frameList[i].numCandidates;
-        i++; 
+				totalCandidates += frameList[i].numCandidates;
     }
     
     double t_afterDetect = timestamp() - t0;
