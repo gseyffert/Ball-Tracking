@@ -24,13 +24,14 @@ include_directories( ${OpenCV_INCLUDE_DIRS})
 
 add_executable( DetectBall test-DetectBall.cpp )
 target_link_libraries( DetectBall ${OpenCV_LIBS} )
-target_link_libraries( DetectBall OCL-Utilities SIPL )
+target_link_libraries( DetectBall OCL-Utilities)
 
 add_executable( Visualize test-Visualize.cpp )
 target_link_libraries( Visualize ${OpenCV_LIBS} )
 
 add_executable( main main.cpp DetectBall.cpp graph/composeGraph.cpp graph/freeGraph.cpp graph/shortestPath.cpp Visualize.cpp makeVid.cpp )
 target_link_libraries( main ${OpenCV_LIBS} )
+target_link_libraries( main OCL-Utilities)
 
 #add_executable( test-graph graph/composeGraph.cpp graph/test-composeGraph.cpp )
 

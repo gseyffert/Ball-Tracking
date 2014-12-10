@@ -4,7 +4,6 @@
 #include "OpenCLUtilities/openCLUtilities.hpp"
 
 
-#include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -194,7 +193,7 @@ void convertToGray_Optimized(Mat& src, Mat& src_gray){
      * and cl file that they're kept in */
     std::string toGray_name_str = std::string("toGray");
     std::string toGray_kernel_file = std::string("toGray.cl");
-    
+    printf("BEFORE");
     cl_vars_t cv;
     cl_kernel toGray;
     

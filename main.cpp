@@ -4,6 +4,18 @@
 #include <sys/time.h>
 #include <cstring>
 
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "OpenCLUtilities/openCLUtilities.hpp"
+
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+
+
 using namespace cv;
 
 int MAX_CANDIDATES = 10;

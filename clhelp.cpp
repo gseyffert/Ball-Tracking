@@ -175,12 +175,12 @@ void readFile(std::string& fileName, std::string &out)
     }
 }
 
-double timestamp()
+/*double timestamp()
 {
   struct timeval tv;
   gettimeofday (&tv, 0);
   return tv.tv_sec + 1e-6*tv.tv_usec;
-}
+}*/
 
 void adjustWorkSize(size_t &global, size_t local)
 {
