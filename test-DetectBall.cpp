@@ -1,4 +1,5 @@
 #include "DetectBall.cpp"
+#include <sys/time.h>
 
 int main(int argc, char* argv[])
 {
@@ -33,45 +34,51 @@ int main(int argc, char* argv[])
 
     //////////////////////////////// MAIN //////////////////////////////
     // initialize clock
-    clock_t start;
-    double duration;
-    start = clock();
+    struct timeval start, end;
+    float delta = 0;
+    gettimeofday(&start, NULL);
 		
-		int numCandidates;
+	int numCandidates;
 
     // main function
     detectBall(src, candidateArray, NAIVE, &numCandidates);
 
     //Compute time and print
-    duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+    gettimeofday(&end, NULL);
+    delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+         end.tv_usec - start.tv_usec) / 1.e6;
     printCandidates(candidateArray);
-    cout<<"Naive Total Time: "<< duration <<'\n';
+    cout<<"Naive Total Time: "<< delta <<'\n';
     //////////////////////////////////////////////////////////////////////
     
     //////////////////////////////// MAIN //////////////////////////////
     // initialize clock
-    start = clock();
+    gettimeofday(&start, NULL);
 
     // main function
     detectBall(src, candidateArray, OPEN_CV, &numCandidates);
 
     //Compute time
-    duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+    gettimeofday(&end, NULL);
+    delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+         end.tv_usec - start.tv_usec) / 1.e6;
     printCandidates(candidateArray);
-    cout<<"Open CV Total Time: "<< duration <<'\n';
+    cout<<"Open CV Total Time: "<< delta <<'\n';
     //////////////////////////////////////////////////////////////////////
     
     //////////////////////////////// MAIN //////////////////////////////
     // initialize clock
-    start = clock();
+    gettimeofday(&start, NULL);
 
     // main function
     detectBall(src, candidateArray, OPTIMIZED, &numCandidates);
 
     //Compute time
-    duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
+    gettimeofday(&end, NULL);
+    delta = ((end.tv_sec  - start.tv_sec) * 1000000u + 
+         end.tv_usec - start.tv_usec) / 1.e6;
     printCandidates(candidateArray);
-    cout<<"Optimized Total Time: "<< duration <<'\n';
+    cout<<"Optimized Total Time: "<< delta <<'\n';
     //////////////////////////////////////////////////////////////////////
 
     //image will not appear without this waitKey() command
