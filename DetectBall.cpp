@@ -14,11 +14,15 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
+<<<<<<< HEAD
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 //#include <omp.h>
+=======
+// #include <omp.h>
+>>>>>>> d70eb4e92de9fde5029d84a2e9f04e76bbd04dc1
 #include "BallTracking.h"
 #include "clhelp.h"
 #include "clhelp.cpp"
@@ -214,15 +218,16 @@ void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
 
     float rs = ceil(r * 2.57);   // significant radius
 
-    for(int i=0; i < h; i++)
-        for(int j=0; j<w; j++) {
+    for(int j=0; j<w; j++) {
+
+        for(int i=0; i < h; i++){
 
             float val = 0, wsum = 0;
 
-            for(int iy = i-rs; iy<i+rs+1; iy++)
-								
-                for(int ix = j-rs; ix<j+rs+1; ix++) {
+            for(int iy = i-rs; iy<i+rs+1; iy++){
 
+                for(int ix = j-rs; ix<j+rs+1; ix++) {
+								
                     float x = min(w-1, max(0, ix));
                     float y = min(h-1, max(0, iy));
                     float dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
@@ -231,34 +236,42 @@ void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
                     val += src.at<uchar>(y,x) * wght;  wsum += wght;
 
                 }
-
+            }
             dst.at<uchar>(i,j) = round(val/wsum);            
-
         }
+    }
 }
 
 // source channel, target channel, width, height, radius
-void gaussBlur_Optimized(Mat src, int w, int h, int r) {
+void gaussBlur_Optimized(Mat src, int w, int h) {
+    // r = 2
     uchar *rowPtrSrc;
     uchar *rowPtrDst;
     int x,y,iy,ix,i,j;
     float dsq, wght;
     float val, wsum;
 
+<<<<<<< HEAD
     float rs = ceil( r * 2.57);   // significant radius
     
+=======
+    // significant radius = 6
+    // w = num_columns, w = col
+    // h = num_rows, i = row
+    // #pragma omp parallel for num_threads(1)
+>>>>>>> d70eb4e92de9fde5029d84a2e9f04e76bbd04dc1
     for(i=0; i < h; i++){
         rowPtrDst= src.ptr<uchar>(i);
         for(j=0; j<w; j++) {
             val = 0, wsum = 0;
-            for(iy = i-rs; iy<i+rs+1; iy++) {
-                y = min(h-1, max(0, iy));
-                rowPtrSrc= src.ptr<uchar>(y);
-                for(ix = j-rs; ix<j+rs+1; ix++) {
-                    x = min(w-1, max(0, ix));
+            // printf("%d\n", omp_get_num_threads());
+            // vsum = _mm_setzero_ps();
+            for(iy = max(0,i-6); iy<=min(h-1,i+6); iy++) {
+                rowPtrSrc= src.ptr<uchar>(iy);
+                for(ix = max(0,j-6); ix<=min(w-1,j+6); ix++) {
                     dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
-                    wght = exp( -dsq / (2*r*r) ) / (3*2*r*r);
-                    val += rowPtrSrc[x] * wght;  wsum += wght;
+                    wght = exp( -dsq / (2*2*2) ) / (3*2*2*2);
+                    val += rowPtrSrc[ix] * wght;  wsum += wght;
                 }
             }
             rowPtrDst[j] = round(val/wsum);            
@@ -266,6 +279,76 @@ void gaussBlur_Optimized(Mat src, int w, int h, int r) {
     }
 }
 
+
+/*
+// source channel, target channel, width, height, radius
+void gaussBlur_Optimized(Mat src, int w, int h) {
+    // r = 2
+    uchar *rowPtrSrc;
+    uchar *rowPtrDst;
+    int x,y,iy,i,j;
+    float dsq, wght;
+    float val, wsum;
+
+    // significant radius = 6
+    // w = num_columns, j = col
+    // h = num_rows, i = row
+    // #pragma omp parallel for num_threads(1)
+    for(i=0; i < h; i++){
+        __m128 frame_line;
+        __m128 vsum;
+        __m128 vval;
+        __m128 vectorix;
+        __m128 vdsq;
+        __m128 vectorJ;
+        __m128 vectorIYI;
+
+        __m128 offsets = _mm_set_ps(0,1,2,3);
+
+        float *vsum_array;
+        vsum_array = (float*)malloc(4 * sizeof(float));
+        float *vval_array;
+        vval_array = (float*)malloc(4 * sizeof(float));
+
+        rowPtrDst= src.ptr<uchar>(i);
+        for(j=0; j<w; j++) {
+            vectorJ = _mm_set1_ps((float)j);
+            val = 0, wsum = 0;
+            // printf("%d\n", omp_get_num_threads());
+            vsum = _mm_setzero_ps();
+            vval = _mm_setzero_ps();
+            for(iy = max(0,i-6); iy<=min(h-1,i+6); iy++) {
+                vectorIYI = _mm_set1_ps((float)((iy-i)*(iy-i)));
+                int ix;
+                rowPtrSrc= src.ptr<uchar>(iy);
+                for(ix = max(0,j-6); ix + 3<=min(w-1,j+6); ix+=4) {
+                    frame_line = _mm_loadu_ps((float*)&rowPtrSrc[ix]);
+                    vectorix = _mm_add_ps(_mm_set1_ps((float)ix), offsets);
+                    vdsq = _mm_sub_ps(vectorix, vectorJ);
+                    vdsq = _mm_mul_ps(vdsq,vdsq);
+                    vdsq = _mm_add_ps(vdsq,vectorIYI);
+                    vdsq = _mm_div_ps(_mm_exp_ps(_mm_div_ps(_mm_sub_ps(_mm_setzero_ps(),vdsq), _mm_set1_ps(8))), _mm_set1_ps(24))
+                    // dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
+                    // wght = exp( -dsq / (2*2*2) ) / (3*2*2*2);
+                    vval = _mm_add_ps(vval, _mm_mul_ps(frame_line,vdsq));
+                    vsum = _mm_add_ps(vsum, vdsq);
+                    // val += rowPtrSrc[ix] * wght;  wsum += wght;
+                }
+                for(; ix<=min(w-1,j+6); ix++) {
+                    dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
+                    wght = exp( -dsq / (2*2*2) ) / (3*2*2*2);
+                    val += rowPtrSrc[ix] * wght;  wsum += wght;
+                }
+            }
+            _mm_storeu_ps(vsum_array, vsum);
+            wsum += *vsum_array + *(vsum_array+1) + *(vsum_array + 2) + *(vsum_array + 3);
+            _mm_storeu_ps(vval_array, vval);
+            val += *vval_array + *(vval_array+1) + *(vval_array + 2) + *(vval_array + 3);
+            rowPtrDst[j] = round(val/wsum);            
+        }
+    }
+}
+*/
 
 void detectBall(Mat src, candidate* candidateArray, const int type, int* numCandidates) {
     /**
@@ -286,8 +369,13 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     }
     else if (type == OPTIMIZED){
         src_gray = Mat(src.rows, src.cols, CV_8U);
+<<<<<<< HEAD
         convertToGray_Optimized(src, src_gray);
         gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows, 2);
+=======
+        convertToGray(src, src_gray);
+        gaussBlur_Optimized( src_gray, src_gray.cols,  src_gray.rows);
+>>>>>>> d70eb4e92de9fde5029d84a2e9f04e76bbd04dc1
     }
 
     // those paramaters cannot be = 0 so we must check here
