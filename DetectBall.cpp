@@ -47,7 +47,7 @@ int cannyThreshold = cannyThresholdInitialValue;
 int accumulatorThreshold = accumulatorThresholdInitialValue;
 
 // booleans for speed
-const bool showImage = false;
+const bool showImage = true;
 const bool showTrackbars = false;
 
 void on_trackbar( int, void* )
@@ -127,26 +127,28 @@ void oclToGray(cl_command_queue &queue,
     int rows = src[i].rows;
     int cols = src[i].cols;
     int size = rows*cols;
-    uchar *array = new uchar[size];
-    if(src[i].isContinuous())
-        array = src[i].data;
-    cl_mem src, dst;
+    unsigned char *in_array;
+    unsigned char *out_array = new unsigned char[rows*cols];
+    //if(src[i].isContinuous())
+    in_array = src[i].data;
 
-    src = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
+    cl_mem srcc, dst;
+
+
+    srcc = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size*3,NULL,&err);
     CHK_ERR(err);
     dst = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
     CHK_ERR(err);
 
 
-
-    err = clEnqueueWriteBuffer(queue, src, true, 0, sizeof(uchar)*size, array, 0, NULL, NULL);
+    err = clEnqueueWriteBuffer(queue, srcc, true, 0, sizeof(uchar)*size*3, in_array, 0, NULL, NULL);
     CHK_ERR(err);
 
 
     ::size_t global_work_size[1] = {(unsigned long)size};
 
 
-    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), &src);
+    err = clSetKernelArg(toGray, 0, sizeof(cl_mem), &srcc);
     CHK_ERR(err); 
     err = clSetKernelArg(toGray, 1, sizeof(cl_mem), &dst);
     CHK_ERR(err);
@@ -176,18 +178,16 @@ void oclToGray(cl_command_queue &queue,
 
     /* Read result of GPU on host CPU */
     err = clEnqueueReadBuffer(queue, dst, true, 0, sizeof(uchar)*size,
-                array, 0, NULL, NULL);
+                out_array, 0, NULL, NULL);
     CHK_ERR(err);
-    Mat result = Mat(rows, cols, CV_8U3, array);
 
-    *dest = result;
+    dest[i].rows = rows;
+    dest[i].cols = cols;
+    dest[i].data = out_array;
 
     clReleaseMemObject(dst);
-    clReleaseMemObject(src); 
+    clReleaseMemObject(srcc); 
  
-
-
-
   }
 }
 
@@ -372,7 +372,7 @@ void gaussBlur_Optimized(Mat src, int w, int h) {
 }
 */
 
-void detectBall(Mat src, candidate* candidateArray, const int type, int* numCandidates) {
+void detectBall(Mat src, candidate* candidateArray, const int type, int* numCandidates ) {
     /**
      * Takes in a Mat (image matrix) src and a pointer to an Array of Candidates
      * Returns void, but fills candidate Array with possible candidates
@@ -406,6 +406,6 @@ void detectBall(Mat src, candidate* candidateArray, const int type, int* numCand
     if(showImage){
         imshow(windowName,src);
         waitKey(5);
-        //imshow(windowName + "Gray",src_gray);
+        imshow(windowName + "Gray",src_gray);
     }
 }

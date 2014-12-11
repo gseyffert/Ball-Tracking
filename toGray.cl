@@ -3,22 +3,22 @@ __kernel void toGray(__global uchar* in,
         int rows,
         int cols) {
 
-    //size_t tid = get_local_id(0);
-    //size_t gid = get_group_id(0);
-    //size_t dim = get_local_size(0);
+    size_t tid = get_local_id(0);
+    size_t gid = get_group_id(0);
     size_t idx = get_global_id(0);
 
-    int tmp;
-    int size = cols*rows;
-    for (int i = idx; i < size; i+=idx) {
-        int index = (i);
-        uchar b = in[index];
-        uchar g = in[index+1];
-        uchar r = in[index+2];
-        int tmp;    
-        tmp = b << 1;
-        tmp += (g << 2) + g;
-        tmp += r;
-        out[i] = (unsigned char) tmp;
+    int write_addr = idx;
+    int pull_addr = 3*write_addr;
+    float tmp;    
+
+    if (write_addr < cols*rows) {
+        int b = in[pull_addr];
+        int g = in[pull_addr+1];
+        int r = in[pull_addr+2];
+        tmp = b * 0.144;
+        tmp += g * 0.587;
+        tmp += r * 0.299;
+        out[write_addr] = (unsigned char) tmp;
     }
+
 }
