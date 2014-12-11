@@ -175,11 +175,13 @@ void oclToGray(cl_command_queue &queue,
     destMat.release();*/
 
     /* Read result of GPU on host CPU */
-    err = clEnqueueReadBuffer(queue, src, true, 0, sizeof(uchar)*size,
+    err = clEnqueueReadBuffer(queue, dst, true, 0, sizeof(uchar)*size,
                 array, 0, NULL, NULL);
     CHK_ERR(err);
+    Mat result = Mat(rows, cols, CV_8U3, array);
 
-    
+    *dest = result;
+
     clReleaseMemObject(dst);
     clReleaseMemObject(src); 
  
