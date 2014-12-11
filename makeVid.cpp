@@ -42,7 +42,7 @@ int runffmpeg(string filePattern, string outName, string startNum, string size/*
     }
 
     string command = "";
-    command += "ffmpeg ";
+    command += "ffmpeg -y ";
     // Set the start num
     command += "-start_number " + startNum +" ";
 

@@ -15,7 +15,7 @@ __kernel void toGray(__global uchar* in,
         int b = in[pull_addr];
         int g = in[pull_addr+1];
         int r = in[pull_addr+2];
-        tmp = b * 0.144;
+        tmp = b * 0.114;
         tmp += g * 0.587;
         tmp += r * 0.299;
         out[write_addr] = (unsigned char) tmp;

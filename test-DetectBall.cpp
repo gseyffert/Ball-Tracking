@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 		
 	int numCandidates;
 
-    // main function
+ /*   // main function
     detectBall(src, candidateArray, NAIVE, &numCandidates);
 
     //Compute time and print
@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
     printCandidates(candidateArray);
     cout<<"Naive Total Time: "<< delta <<'\n';
     //////////////////////////////////////////////////////////////////////
-    
-    //////////////////////////////// MAIN //////////////////////////////
+  */  
+/*    //////////////////////////////// MAIN //////////////////////////////
     // initialize clock
     gettimeofday(&start, NULL);
 
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
          end.tv_usec - start.tv_usec) / 1.e6;
     printCandidates(candidateArray);
     cout<<"Open CV Total Time: "<< delta <<'\n';
-    //////////////////////////////////////////////////////////////////////
+*/    //////////////////////////////////////////////////////////////////////
     
     //////////////////////////////// MAIN //////////////////////////////
     // initialize clock
