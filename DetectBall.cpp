@@ -114,6 +114,7 @@ void HoughDetection(Mat& src_gray, Mat& src, int cannyThreshold, int accumulator
 void oclToGray(cl_command_queue &queue,
                cl_context &context,
                cl_kernel &toGray,
+               cl_kernel &gaussBlur,
                Mat* src, 
                Mat* dest,
                int numFrames) {
@@ -132,14 +133,15 @@ void oclToGray(cl_command_queue &queue,
     //if(src[i].isContinuous())
     in_array = src[i].data;
 
-    cl_mem srcc, dst;
+    cl_mem srcc, dst_gray, dst_blur;
 
 
     srcc = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size*3,NULL,&err);
     CHK_ERR(err);
-    dst = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
+    dst_gray = clCreateBuffer(context,CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
     CHK_ERR(err);
-
+    dst_blur = clCreateBuffer(context, CL_MEM_READ_WRITE,sizeof(uchar)*size,NULL,&err);
+    CHK_ERR(err);
 
     err = clEnqueueWriteBuffer(queue, srcc, true, 0, sizeof(uchar)*size*3, in_array, 0, NULL, NULL);
     CHK_ERR(err);
@@ -150,17 +152,14 @@ void oclToGray(cl_command_queue &queue,
 
     err = clSetKernelArg(toGray, 0, sizeof(cl_mem), &srcc);
     CHK_ERR(err); 
-    err = clSetKernelArg(toGray, 1, sizeof(cl_mem), &dst);
+    err = clSetKernelArg(toGray, 1, sizeof(cl_mem), &dst_gray);
     CHK_ERR(err);
     err = clSetKernelArg(toGray, 2, sizeof(int), &rows);
     CHK_ERR(err);
     err = clSetKernelArg(toGray, 3, sizeof(int), &cols);
     CHK_ERR(err);
-    /*err = clSetKernelArg(toGray, 4, sizeof(int), &curMat.step);
-    CHK_ERR(err);
-    err = clSetKernelArg(toGray, 5, sizeof(int), curMat.oclchannels());
-    CHK_ERR(err);*/
 
+    printf("converting to gray\n");
     err = clEnqueueNDRangeKernel(queue,
         toGray,
         1,
@@ -172,28 +171,50 @@ void oclToGray(cl_command_queue &queue,
         NULL
         );
     CHK_ERR(err);
-    /*src[i] = destMat.Mat();
-    curMat.release();
-    destMat.release();*/
 
-    /* Read result of GPU on host CPU */
-    err = clEnqueueReadBuffer(queue, dst, true, 0, sizeof(uchar)*size,
-                out_array, 0, NULL, NULL);
+    printf("Done converting to gray\n");
+
+    err = clSetKernelArg(gaussBlur, 0, sizeof(cl_mem), &dst_gray);
+    CHK_ERR(err); 
+    err = clSetKernelArg(gaussBlur, 1, sizeof(cl_mem), &dst_blur);
     CHK_ERR(err);
+    err = clSetKernelArg(gaussBlur, 2, sizeof(int), &rows);
+    CHK_ERR(err);
+    err = clSetKernelArg(gaussBlur, 3, sizeof(int), &cols);
+    CHK_ERR(err);
+    err = clEnqueueNDRangeKernel(queue,
+        gaussBlur,
+        1,
+        NULL,
+        global_work_size,
+        local_work_size,
+        0,
+        NULL,
+        NULL
+        );
+    CHK_ERR(err);
+    printf("Done blurring\n");
 
+    err = clEnqueueReadBuffer(queue, dst_blur, true, 0, sizeof(uchar)*size,
+                out_array, 0, NULL, NULL);
+    CHK_ERR(err);    
+    printf("Done reading\n");
+    
     dest[i].rows = rows;
     dest[i].cols = cols;
     dest[i].data = out_array;
+    printf("Done reading2\n");
 
-    clReleaseMemObject(dst);
-    clReleaseMemObject(srcc); 
- 
+    clReleaseMemObject(srcc);
+    clReleaseMemObject(dst_gray);
+    clReleaseMemObject(dst_blur); 
+    printf("Done reading3\n");
   }
 }
 
 void convertToGray_Optimized(Mat& src, Mat& src_gray){
 
-    std::string toGray_kernel_str;
+    std::string toGray_kernel_str, gaussBlur_kernel_str;
     
 
     cl_int err = CL_SUCCESS;
@@ -201,11 +222,14 @@ void convertToGray_Optimized(Mat& src, Mat& src_gray){
      * and cl file that they're kept in */
     std::string toGray_name_str = std::string("toGray");
     std::string toGray_kernel_file = std::string("toGray.cl");
+    std::string gaussBlur_name_str = std::string("gaussBlur");
+    std::string gaussBlur_kernel_file = std::string("gaussBlur.cl");
     cl_vars_t cv;
-    cl_kernel toGray;
+    cl_kernel toGray, gaussBlur;
     
     /* Read OpenCL file into STL string */
     readFile(toGray_kernel_file, toGray_kernel_str);
+    readFile(gaussBlur_kernel_file, gaussBlur_kernel_str);
 
     /* Initialize the OpenCL runtime
      * Source in clhelp.cpp */
@@ -214,8 +238,10 @@ void convertToGray_Optimized(Mat& src, Mat& src_gray){
     /* Compile all OpenCL kernels */
     compile_ocl_program(toGray, cv, toGray_kernel_str.c_str(),
                         toGray_name_str.c_str());
+    compile_ocl_program(gaussBlur, cv, gaussBlur_kernel_str.c_str(),
+                        gaussBlur_name_str.c_str());
     
-    oclToGray(cv.commands, cv.context, toGray, &src, &src_gray, 1);
+    oclToGray(cv.commands, cv.context, toGray, gaussBlur, &src, &src_gray, 1);
 
     err = clFlush(cv.commands);
     CHK_ERR(err);
@@ -261,7 +287,8 @@ void gaussBlur_Naive(Mat src, Mat dst, int w, int h, int r) {
                     float dsq = (ix-j)*(ix-j)+(iy-i)*(iy-i);
                     float wght = exp( -dsq / (2*r*r) ) / (3*2*r*r);
                     // printf("%d\n", wght );
-                    val += src.at<uchar>(y,x) * wght;  wsum += wght;
+                    val += src.at<uchar>(y,x) * wght;  
+                    wsum += wght;
 
                 }
             }
