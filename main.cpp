@@ -8,9 +8,9 @@
 using namespace cv;
 
 int MAX_CANDIDATES = 10;
-int THREAD_NUM = 8;
+int THREAD_NUM = 2;
 
-const int MODE = OPEN_CV;
+const int MODE = OPTIMIZED;
 
 #define showImage 0
 
@@ -82,11 +82,12 @@ int main(int argc, char** argv)
       	detectBall(currFrame, candidateArray, MODE, &numCandidates);
 
         if (numCandidates == 0) {
-            printf("No candidates\n");
+            printf("No candidates @ %d\n", i);
             if (i == 0) exit(1);
             //no candidates
             frameList[i] = frameList[i-1];
         } else {
+            // printf("Candidates @ %d\n", i);
             frameList[i].numCandidates = numCandidates;
             frameList[i].candidateList = candidateArray;
             frameList[i].nodes = NULL;
