@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 	int numCandidates;
 
     // main function
-    detectBall(src, candidateArray, NAIVE, &numCandidates);
+    detectBall(src, candidateArray, OPTIMIZED, &numCandidates);
 
     //Compute time and print
     gettimeofday(&end, NULL);

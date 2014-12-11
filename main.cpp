@@ -8,6 +8,7 @@
 using namespace cv;
 
 int MAX_CANDIDATES = 10;
+int THREAD_NUM = 8;
 
 const int MODE = OPEN_CV;
 
@@ -45,18 +46,17 @@ int main(int argc, char** argv)
     printf("Loaded %d frame video\n", LEN_VIDEO);
 
 	Mat* videoBuffer = new Mat[LEN_VIDEO];
-    printf("1\n");
     Mat currFrame;
     cap >> currFrame; // load the first frame of the source video
-    printf("2\n");
 
 	int i = 0;
+
 
     while(!currFrame.empty())
     {
 
         if (showImage) {
-            // imshow("vid", currFrame);
+            imshow("vid", currFrame);
             waitKey(10);
         }
 		videoBuffer[i] = currFrame;
@@ -70,9 +70,8 @@ int main(int argc, char** argv)
 
 	int totalCandidates = 0;
 	int numCandidates;
-    printf("6\n");
 
-	#pragma omp parallel for num_threads(8)
+	#pragma omp parallel for num_threads(THREAD_NUM) schedule(dynamic) private(numCandidates, i, currFrame) reduction(+:totalCandidates)
 	for(i = 0; i < LEN_VIDEO; i++){
 		currFrame = videoBuffer[i]; 
 
@@ -80,10 +79,10 @@ int main(int argc, char** argv)
 		candidate* candidateArray = (candidate*) malloc(sizeof(candidate) * MAX_CANDIDATES);	
 
         // call detectBall
-        printf("7\n"); 
       	detectBall(currFrame, candidateArray, MODE, &numCandidates);
 
         if (numCandidates == 0) {
+            printf("No candidates\n");
             if (i == 0) exit(1);
             //no candidates
             frameList[i] = frameList[i-1];
@@ -92,30 +91,24 @@ int main(int argc, char** argv)
             frameList[i].candidateList = candidateArray;
             frameList[i].nodes = NULL;
         }
-        printf("8\n");
         //printf("%d: %d potential candidates detected\n", i, numCandidates);
 
     	totalCandidates += frameList[i].numCandidates;
     }
-    printf("9\n");
     
     double t_afterDetect = timestamp() - t0;
 
-    printf("10\n");
 	node* graph = composeGraph(frameList, LEN_VIDEO);
 
     double t_afterCompose = timestamp() - t0;
-    printf("11\n");
 	LinkedList<node*>* selectedCandidates = shortestPath(graph, totalCandidates);
 
     double t_afterPath = timestamp() - t0; 
 
 	node* tempNode;
 	candidate* tempCandidate;
-    printf("12\n");
 
     visualize(selectedCandidates, filename, LEN_VIDEO);
-    printf("13\n");
 
     double t_afterVis = timestamp() - t0;
 
@@ -124,10 +117,10 @@ int main(int argc, char** argv)
     double t_afterFfmpeg = timestamp() - t0;
 
 	freeGraph(frameList, graph, LEN_VIDEO-1);
-    printf("14\n");
 
     double t_afterFree = timestamp() - t0;
 
+    printf("With video %s. And DetectBall MODE == OPEN_CV , and threads num = %d\n", argv[1], THREAD_NUM);
     printf("Execution Completed for %d frame video:\n", LEN_VIDEO);
     printf("Detect Ball   : %f elapsed ( %f %% )\n", t_afterDetect, 100*t_afterDetect/t_afterFree);
     printf("Compose Graph : %f elapsed ( %f %% )\n", t_afterCompose - t_afterDetect, 100*(t_afterCompose - t_afterDetect)/t_afterFree);
